@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cv2
 import numpy as np
 from traits.api import Array, Property, List, Bool, Event, Range, TraitError
