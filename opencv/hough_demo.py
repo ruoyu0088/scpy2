@@ -5,11 +5,14 @@ from traits.api import Range, Bool
 from traitsui.api import Item, Group, VGroup
 from .demobase import ImageProcessDemo
 from matplotlib.collections import LineCollection, EllipseCollection
-
+from matplotlib import patches
 
 class HoughDemo(ImageProcessDemo):
     TITLE = u"Hough Demo"
     DEFAULT_IMAGE = "stuff.jpg"
+    SETTINGS = ["th1", "th2", "show_canny", "rho", "theta", "hough_th",
+                "minlen", "maxgap", "dp", "mindist", "param1", "param2",
+                "linewidth", "alpha"]
 
     # Canny parameters
     th1 = Range(0.0, 255.0, 50.0)
