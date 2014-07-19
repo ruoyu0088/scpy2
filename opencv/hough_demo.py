@@ -2,7 +2,7 @@
 import cv2
 import numpy as np
 from traits.api import Range, Bool
-from traitsui.api import Item, Group, VGroup
+from traitsui.api import Item, Group, VGroup, HGroup
 from .demobase import ImageProcessDemo
 from matplotlib.collections import LineCollection, EllipseCollection
 from matplotlib import patches
@@ -12,7 +12,10 @@ class HoughDemo(ImageProcessDemo):
     DEFAULT_IMAGE = "stuff.jpg"
     SETTINGS = ["th1", "th2", "show_canny", "rho", "theta", "hough_th",
                 "minlen", "maxgap", "dp", "mindist", "param1", "param2",
-                "linewidth", "alpha"]
+                "linewidth", "alpha", "check_line", "check_circle"]
+
+    check_line = Bool(True)
+    check_circle = Bool(True)
 
     # Canny parameters
     th1 = Range(0.0, 255.0, 50.0)
@@ -63,6 +66,10 @@ class HoughDemo(ImageProcessDemo):
             Group(
                 Item("linewidth", label=u"线宽"),
                 Item("alpha", label=u"alpha"),
+                HGroup(
+                    Item("check_line", label=u"直线"),
+                    Item("check_circle", label=u"圆"),
+                ),
                 label=u"绘图参数"
             )
         )
@@ -70,7 +77,8 @@ class HoughDemo(ImageProcessDemo):
     def __init__(self, **kwargs):
         super(HoughDemo, self).__init__(**kwargs)
         self.connect_dirty("th1, th2, show_canny, rho, theta, hough_th,"
-                           "minlen, maxgap, dp, mindist, param1, param2, linewidth, alpha")
+                           "minlen, maxgap, dp, mindist, param1, param2, "
+                           "linewidth, alpha, check_line, check_circle")
         self.lines = LineCollection([], linewidths=2, alpha=0.6)
         self.axe.add_collection(self.lines)
 
@@ -96,31 +104,37 @@ class HoughDemo(ImageProcessDemo):
         else:
             show_img = self.img
 
-        theta = self.theta / 180.0 * np.pi
-        lines = cv2.HoughLinesP(edge_img,
-                                self.rho, theta, self.hough_th,
-                                minLineLength=self.minlen,
-                                maxLineGap=self.maxgap)
+        if self.check_line:
+            theta = self.theta / 180.0 * np.pi
+            lines = cv2.HoughLinesP(edge_img,
+                                    self.rho, theta, self.hough_th,
+                                    minLineLength=self.minlen,
+                                    maxLineGap=self.maxgap)
 
-        if lines is not None:
-            lines = lines[0]
-            lines.shape = -1, 2, 2
-            self.lines.set_segments(lines)
-            self.lines.set_visible(True)
+            if lines is not None:
+                lines = lines[0]
+                lines.shape = -1, 2, 2
+                self.lines.set_segments(lines)
+                self.lines.set_visible(True)
+            else:
+                self.lines.set_visible(False)
         else:
             self.lines.set_visible(False)
 
-        circles = cv2.HoughCircles(self.img_smooth, 3,
-                                   self.dp, self.mindist,
-                                   param1=self.param1, param2=self.param2)
+        if self.check_circle:
+            circles = cv2.HoughCircles(self.img_smooth, 3,
+                                       self.dp, self.mindist,
+                                       param1=self.param1, param2=self.param2)
 
-        if circles is not None:
-            circles = circles[0]
-            self.circles._heights = self.circles._widths = circles[:, 2]
-            self.circles.set_offsets(circles[:, :2])
-            self.circles._angles = np.zeros(len(circles))
-            self.circles._transOffset = self.axe.transData
-            self.circles.set_visible(True)
+            if circles is not None:
+                circles = circles[0]
+                self.circles._heights = self.circles._widths = circles[:, 2]
+                self.circles.set_offsets(circles[:, :2])
+                self.circles._angles = np.zeros(len(circles))
+                self.circles._transOffset = self.axe.transData
+                self.circles.set_visible(True)
+            else:
+                self.circles.set_visible(False)
         else:
             self.circles.set_visible(False)
 
