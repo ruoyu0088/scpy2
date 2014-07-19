@@ -62,7 +62,7 @@ class ImageProcessDemo(HasTraits):
         super(ImageProcessDemo, self).__init__(**kwargs)
         self.axe = self.figure.add_subplot(111)
         self.figure.subplots_adjust(0, 0, 1, 1)
-        self.img = np.zeros((10, 10, 3))
+        self.img = np.zeros((10, 10, 3), np.uint8)
         self.image_artist = self.axe.imshow(self.img, interpolation="nearest")
         self.axe.axis("off")
         self.axe.set_aspect("equal")
