@@ -8,7 +8,8 @@ import matplotlib.transforms as mtrans
 import numpy as np
 
 class ImageMaskDrawer(HasTraits):
-    
+
+    mask_updated = Event
     drawed = Event
     
     def __init__(self, ax, img=None, mask_shape=None, canmove=True, size=None):
@@ -56,7 +57,8 @@ class ImageMaskDrawer(HasTraits):
         self.bbox.set_points(np.array([[0, 0], [self.width, self.height]]))
 
     def clear_mask(self):
-        self.array[:] = 0
+        self.array[:, :, :-1] = 255
+        self.array[:, :, -1] = 0
 
     def get_mask_array(self):
         return self.array[:, :, -1].copy()
@@ -90,6 +92,7 @@ class ImageMaskDrawer(HasTraits):
             self.mask_circle.center = self.last_pos
             if event.button == 1:
                 self.mask_circle.draw(self.renderer)
+                self.mask_updated = True
             self.mask_img.set_array(self.array)            
             self._update()
         
@@ -116,6 +119,7 @@ class ImageMaskDrawer(HasTraits):
             self.mask_line.draw(self.renderer)
             self.last_pos = pos
             self.mask_img.set_array(self.array)
+            self.mask_updated = True
         if self.canmove and event.button == 3 and self.last_pos is not None:
             xdata, ydata = event.xdata, event.ydata
             dx = self.last_pos2[0] - xdata
