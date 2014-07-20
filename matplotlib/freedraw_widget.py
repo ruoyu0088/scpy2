@@ -131,7 +131,7 @@ class ImageMaskDrawer(HasTraits):
             self.canvas.restore_region(self.background)
         if self.mask_img.get_animated():
             self.ax.draw_artist(self.mask_img)
-        self.ax.draw_artist(self.circle)        
+        self.ax.draw_artist(self.circle)
         self.canvas.blit(self.ax.bbox)
 
     def update(self):
@@ -149,5 +149,6 @@ if __name__ == "__main__":
     ax = plt.subplot()
     arr = np.zeros((500, 500, 3), dtype=np.uint8)
     img = ax.imshow(arr, origin="upper")
-    drawer = ImageMaskDrawer(ax, img)
+    drawer = ImageMaskDrawer(ax, arr)
+    ax.axis((0, 500, 0, 500))
     plt.show()

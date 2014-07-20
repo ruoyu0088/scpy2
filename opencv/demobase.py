@@ -22,6 +22,7 @@ def get_images(exts):
 
 
 class ImageProcessDemo(HasTraits):
+    YAXIS_DIRECTION = "down"
     DEFAULT_IMAGE = ""
     SIZE = 900, 600
     TITLE = u"Image Process Demo"
@@ -108,7 +109,10 @@ class ImageProcessDemo(HasTraits):
             artist = self.image_artist
         artist.set_data(img)
         h, w = img.shape[:2]
-        artist.set_extent([0, w, h, 0])
+        if self.YAXIS_DIRECTION == "up":
+            artist.set_extent([0, w, 0, h])
+        else:
+            artist.set_extent([0, w, h, 0])
         if self.figure.canvas and draw:
             self.figure.canvas.draw()
 
