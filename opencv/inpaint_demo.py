@@ -9,6 +9,7 @@ from .demobase import ImageProcessDemo
 
 
 class InPaintDemo(ImageProcessDemo):
+    YAXIS_DIRECTION = "up"
     TITLE = u"Inpaint Demo"
     DEFAULT_IMAGE = "stuff.jpg"
 
