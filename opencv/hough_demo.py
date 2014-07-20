@@ -12,6 +12,7 @@ class HoughDemo(ImageProcessDemo):
     DEFAULT_IMAGE = "stuff.jpg"
     SETTINGS = ["th1", "th2", "show_canny", "rho", "theta", "hough_th",
                 "minlen", "maxgap", "dp", "mindist", "param1", "param2",
+                "min_radius", "max_radius", "blur_size",
                 "linewidth", "alpha", "check_line", "check_circle"]
 
     check_line = Bool(True)
@@ -30,10 +31,13 @@ class HoughDemo(ImageProcessDemo):
     maxgap = Range(0, 20, 10)
 
     # HoughtCircle parameters
+    blur_size = Range(1.0, 11.0, 5.0)
     dp = Range(1.0, 5.0, 1.9)
     mindist = Range(1.0, 100.0, 50.0)
     param1 = Range(50, 100.0, 50.0)
     param2 = Range(50, 100.0, 100.0)
+    min_radius = Range(5, 100, 20)
+    max_radius = Range(10, 100, 70)
 
     # draw parameters
     linewidth = Range(1.0, 3.0, 1.0)
@@ -56,11 +60,13 @@ class HoughDemo(ImageProcessDemo):
                 label=u"直线检测"
             ),
             Group(
+                Item("blur_size", label=u"模糊范围"),
                 Item("dp", label=u"分辨率(像素)"),
                 Item("mindist", label=u"圆心最小距离(像素)"),
                 Item("param1", label=u"参数1"),
                 Item("param2", label=u"参数2"),
-
+                Item("min_radius", label=u"最小半径"),
+                Item("max_radius", label=u"最大半径"),
                 label=u"圆检测"
             ),
             Group(
@@ -77,6 +83,7 @@ class HoughDemo(ImageProcessDemo):
     def __init__(self, **kwargs):
         super(HoughDemo, self).__init__(**kwargs)
         self.connect_dirty("th1, th2, show_canny, rho, theta, hough_th,"
+                            "min_radius, max_radius, blur_size,"
                            "minlen, maxgap, dp, mindist, param1, param2, "
                            "linewidth, alpha, check_line, check_circle")
         self.lines = LineCollection([], linewidths=2, alpha=0.6)
@@ -95,7 +102,6 @@ class HoughDemo(ImageProcessDemo):
 
     def _img_changed(self):
         self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
-        self.img_smooth = cv2.blur(self.img_gray, (9, 9))
 
     def draw(self):
         edge_img = cv2.Canny(self.img_gray, self.th1, self.th2)
@@ -122,9 +128,14 @@ class HoughDemo(ImageProcessDemo):
             self.lines.set_visible(False)
 
         if self.check_circle:
-            circles = cv2.HoughCircles(self.img_smooth, 3,
+            blur_size = int(self.blur_size//2)*2 + 1
+            img_smooth = cv2.blur(self.img_gray, (blur_size, blur_size))
+            circles = cv2.HoughCircles(img_smooth, 3,
                                        self.dp, self.mindist,
-                                       param1=self.param1, param2=self.param2)
+                                       param1=self.param1,
+                                       param2=self.param2,
+                                       minRadius=self.min_radius,
+                                       maxRadius=self.max_radius)
 
             if circles is not None:
                 circles = circles[0]
