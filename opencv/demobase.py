@@ -70,7 +70,7 @@ class ImageProcessDemo(HasTraits):
         self.settings = SettingManager(target=self)
 
     def init_timer(self):
-        self.timer = Timer(10, self.check_dirty)
+        self.timer = Timer(100, self.check_dirty)
 
     def check_dirty(self):
         if self.is_dirty:
