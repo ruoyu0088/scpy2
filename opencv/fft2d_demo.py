@@ -4,8 +4,11 @@ import numpy as np
 from numpy import fft
 from traits.api import Instance, Button, List, Bool, Event, Range, TraitError
 from traitsui.api import Item, VGroup
-from scpy2.matplotlib.freedraw_widget import ImageMaskDrawer
+from scpy2.matplotlib.freedraw_widget2 import ImageMaskDrawer
 from .demobase import ImageProcessDemo
+
+
+FFT_SIZE = 512
 
 
 def normalize_gray_image(img):
@@ -24,6 +27,9 @@ class FFT2DDemo(ImageProcessDemo):
     def __init__(self, **kw):
         super(FFT2DDemo, self).__init__(**kw)
         self.mask_artist = None
+        self.figure.canvas_events = [
+            ("button_press_event", self.on_button_pressed)
+        ]
 
     def control_panel(self):
         return VGroup(
@@ -34,7 +40,13 @@ class FFT2DDemo(ImageProcessDemo):
     def init_draw(self):
         self.mask_artist = ImageMaskDrawer(self.axe, mask_shape=(512, 512),
                                            canmove=False, size=15)
-        self.mask_artist.on_trait_change(self.draw, "mask_updated")
+        self.connect_dirty("mask_artist.mask_updated")
+
+
+    def on_button_pressed(self, event):
+        if event.inaxes is self.axe:
+            if event.button == 3:
+                self._reset_fired()
 
     def _reset_fired(self):
         self.mask_artist.clear_mask()
@@ -43,15 +55,15 @@ class FFT2DDemo(ImageProcessDemo):
 
     def _img_changed(self):
         w, h = self.img.shape[:2]
-        if w >= 512 and h >= 512:
-            self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)[:512, :512].copy()
+        if w >= FFT_SIZE and h >= FFT_SIZE:
+            self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)[:FFT_SIZE, :FFT_SIZE].copy()
             self.img_freq = fft.fft2(self.img_gray)
             self.img_mag = fft.fftshift(np.log10(np.abs(self.img_freq)))
-            self.img_show = np.hstack((self.img[:512, :512, :], self.img[:512, :512, :]))
-            self.img_show[:512, 512:, :] = self.img_gray[:512, :512, None]
+            self.img_show = np.hstack((self.img[:FFT_SIZE, :FFT_SIZE, :], self.img[:FFT_SIZE, :FFT_SIZE, :]))
+            self.img_show[:FFT_SIZE, FFT_SIZE:, :] = self.img_gray[:FFT_SIZE, :FFT_SIZE, None]
 
             img_uint8 = normalize_gray_image(self.img_mag)
-            self.img_show[:512, :512, :] = img_uint8[:, :, None]
+            self.img_show[:FFT_SIZE, :FFT_SIZE, :] = img_uint8[:, :, None]
 
     def draw(self):
         if self.mask_artist is None:
@@ -62,13 +74,15 @@ class FFT2DDemo(ImageProcessDemo):
 
         if np.any(mask):
             y, x = np.where(mask)
-            mask[512-y+1, 512-x+1] = True
+            m = (y > 0) & (x > 0)
+            x, y = x[m], y[m]
+            mask[FFT_SIZE - y, FFT_SIZE - x] = True
             self.mask_artist.array[:, :, -1] = mask * 255
             filtered_img = fft.ifft2(self.img_freq * fft.fftshift(mask)).real
             filtered_img = normalize_gray_image(filtered_img)
-            self.img_show[:512, 512:, :] = filtered_img[:, :, None]
+            self.img_show[:FFT_SIZE, FFT_SIZE:, :] = filtered_img[:, :, None]
         else:
-            self.img_show[:512, 512:, :] = self.img_gray[:, :, None]
+            self.img_show[:FFT_SIZE, FFT_SIZE:, :] = self.img_gray[:, :, None]
 
         self.draw_image(self.img_show)
 
