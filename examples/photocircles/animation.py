@@ -13,7 +13,7 @@ from matplotlib.transforms import Affine2D
 from matplotlib.animation import FuncAnimation
 
 
-FRAMES = 40
+FRAMES = 30
 
 
 class DataCircleCollection(CircleCollection):

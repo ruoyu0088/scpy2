@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from traits.api import Event, HasTraits
+from traits.api import Event, HasTraits, Bool
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import RendererAgg
 import matplotlib.patches as mpatches
@@ -11,6 +11,7 @@ class ImageMaskDrawer(HasTraits):
 
     mask_updated = Event
     drawed = Event
+    dirty = Bool(False)
     
     def __init__(self, ax, img=None, mask_shape=None, canmove=True, size=None):
         self.canmove = canmove
@@ -43,6 +44,8 @@ class ImageMaskDrawer(HasTraits):
                                     color="white")
         self.background = None
         self.last_pos = None
+
+
 
     def create_mask(self, img=None, mask_shape=None):
         if mask_shape is None:

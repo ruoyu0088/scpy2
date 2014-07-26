@@ -5,6 +5,7 @@ from tvtk.pyface.scene_editor import SceneEditor
 from tvtk.pyface.scene import Scene
 from tvtk.pyface.scene_model import SceneModel
 
+
 def get_source(obj, target):
     while True:
         for attr in "producer_port","producer","input":
@@ -17,6 +18,7 @@ def get_source(obj, target):
             break
     return obj
 
+
 def difference(pd1, pd2):
     bf = tvtk.BooleanOperationPolyDataFilter()
     bf.operation = "difference"
@@ -25,6 +27,7 @@ def difference(pd1, pd2):
     m = tvtk.PolyDataMapper(input=bf.output, scalar_visibility=False)
     a = tvtk.Actor(mapper=m)
     return bf.output, a
+
 
 def intersection(pd1, pd2, color=(1.0, 0, 0), width=2.0):
     ipd = tvtk.IntersectionPolyDataFilter()
@@ -35,6 +38,7 @@ def intersection(pd1, pd2, color=(1.0, 0, 0), width=2.0):
     a.property.diffuse_color = 1.0, 0, 0
     a.property.line_width = 2.0    
     return ipd.output, a
+
 
 def make_tube(height, radius, resolution, rx=0, ry=0, rz=0):
     cs1 = tvtk.CylinderSource(height=height, radius=radius[0], resolution=resolution)
@@ -60,6 +64,7 @@ class TVTKSceneController(Controller):
     def position(self, info):
         super(TVTKSceneController, self).position(info)
         self.model.depth_peeling()
+
 
 class TubeDemoApp(HasTraits):
     max_radius = Float(1.0)
