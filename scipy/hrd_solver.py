@@ -229,8 +229,7 @@ class HrdSolver(object):
         x, y = int(event.xdata), int(event.ydata)
         if self.can_place_block(x, y):
             self.current_block.set_visible(True)
-            self.current_block.set_x(x)
-            self.current_block.set_y(y)
+            self.current_block.set_xy((x, y))
         else:
             self.current_block.set_visible(False)
         self.fig.canvas.draw_idle()
