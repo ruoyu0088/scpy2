@@ -255,6 +255,5 @@ def find_path(start_node):
 
 
 if __name__ == '__main__':
-    #create_graphs()
-    for node in find_path("BAABBAABBCCBBDDBD  D"):
-        print node
+    import sys
+    dump_graph(sys.argv[1])
