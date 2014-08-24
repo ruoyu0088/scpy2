@@ -2,10 +2,18 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
+get_peaks = Extension("get_peaks",
+                     ["get_peaks.pyx"],
+                     extra_compile_args = ["-Ofast"])
+
+multisearch = Extension("multisearch",
+                        ["multisearch.pyx", "ahocorasick/ahocorasick.c",
+                         "ahocorasick/node.c"],
+                        include_dirs=["ahocorasick"])
+
+vector = Extension("vector", ["vector.pyx"])
+
 setup(
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension("get_peaks",
-    ["get_peaks.pyx"],
-    extra_compile_args = ["-Ofast"]
-    )]
+    ext_modules = [get_peaks, multisearch, vector]
 )
