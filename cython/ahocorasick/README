@@ -1,0 +1,23 @@
+Aho-Corasick Library 1.4
+------------------------
+
+This folder contain the implementation of Aho-Corasick Algorithm.
+
+The Aho–Corasick string matching algorithm is a string searching algorithm invented by 
+Alfred V. Aho and Margaret J. Corasick. It is a kind of dictionary-matching algorithm that 
+locates elements of a finite set of strings (the "dictionary") within an input text. 
+It matches all patterns simultaneously.
+
+
+COMPILE
+-------
+$ cd ahocorasick
+$ make
+
+
+HOW TO USE
+----------
+See example1 and example2 to to learn how to use the ahocorasick library.
+you could also find more practical guides in the multifast application.
+it is recommended to read the comments in the actypes.h and ahocorasick.c
+files to get a better understanding of how it works.
