@@ -1,2 +1,7 @@
 *.pickle
 *.pyc
+*.a
+*.o
+*~
+build
+temp
