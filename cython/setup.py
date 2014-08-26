@@ -13,7 +13,11 @@ multisearch = Extension("multisearch",
 
 vector = Extension("vector", ["vector.pyx"])
 
+blaslib = Extension("blaslib", ["blaslib.pyx"],
+                    extra_compile_args=["-fopenmp"],
+                    extra_link_args=["-fopenmp"])
+
 setup(
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [get_peaks, multisearch, vector]
+    ext_modules = [get_peaks, multisearch, vector, blaslib]
 )
