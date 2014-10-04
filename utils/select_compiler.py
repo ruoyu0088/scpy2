@@ -1,0 +1,114 @@
+import os
+import sys
+from os import path
+from collections import OrderedDict
+from ConfigParser import ConfigParser
+import _winreg
+from distutils.msvc9compiler import find_vcvarsall
+
+HCU = _winreg.HKEY_CURRENT_USER
+
+
+def read_config(fn):
+    config = OrderedDict()
+    if not path.exists(fn):
+        return config
+    parser = ConfigParser()
+    parser.read(fn)
+    for section in parser.sections():
+        options_dict = OrderedDict()
+        config[section] = options_dict
+        options = parser.options(section)
+        for option in options:
+            options_dict[option] = parser.get(section, option)
+    return config
+
+
+def write_config(fn, config):
+    with open(fn, "w") as f:
+        for section, options_dict in config.items():
+            f.write("[{}]\n".format(section))
+            for option, value in options_dict.items():
+                f.write("{}={}\n".format(option, value))
+            f.write("\n")
+
+
+def set_compiler(compiler):
+    from os import path
+    sys_dir = path.dirname(sys.modules['distutils'].__file__)
+    sys_file = path.join(sys_dir, "distutils.cfg")
+    config = read_config(sys_file)
+    if "build" not in config:
+        config["build"] = OrderedDict()
+    build_options = config["build"]
+    build_options["compiler"] = compiler
+    write_config(sys_file, config)
+
+
+def get_vc_dir():
+    user_dir = os.environ["USERPROFILE"]
+    vc_dir = path.join(user_dir, r"AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0")
+    return vc_dir
+
+
+def add_vc9_reg(vc_dir):
+    key = _winreg.CreateKeyEx(HCU, r"Software\Microsoft\VisualStudio\9.0\Setup\VC")
+    _winreg.SetValueEx(key, "ProductDir", None, _winreg.REG_SZ, vc_dir)
+    bat_path = find_vcvarsall(9.0)
+    if bat_path is not None and path.exists(bat_path):
+        print "Succeeded"
+    else:
+        print "Failed"
+
+
+def remove_vc9_reg():
+    try:
+        _winreg.DeleteKeyEx(HCU, r"Software\Microsoft\VisualStudio\9.0\Setup\VC")
+        print "Removed"
+    except WindowsError:
+        print "key not exist"
+
+
+def select_mingw32():
+    set_compiler("mingw32")
+
+
+def select_msvcpy():
+    set_compiler("msvc")
+    vc_dir = get_vc_dir()
+    if not path.exists(vc_dir):
+        print vc_dir, "not exists"
+        print "Please install Visual C++ for Python first"
+        return
+    add_vc9_reg(vc_dir)
+
+
+def select_msvc(version=None):
+    set_compiler("msvc")
+    if version is None:
+        for ver in range(20, 9, -1):
+            vc_dir = find_vcvarsall(ver)
+            if vc_dir is not None:
+                break
+        else:
+            print "No Visual C++ compiler"
+            return
+    else:
+        vc_dir = find_vcvarsall(version)
+    vc_dir = path.dirname(vc_dir)
+    add_vc9_reg(vc_dir)
+
+
+if __name__ == '__main__':
+    opt = sys.argv[1]
+    if opt == "msvcpy":
+        select_msvcpy()
+    elif opt == "mingw32":
+        select_mingw32()
+    elif opt == "msvc":
+        select_msvc()
+    elif opt.startswith("msvc"):
+        version = float(opt[4:])
+        select_msvc(version=version)
+    elif opt == "remove":
+        remove_vc9_reg()
