@@ -238,4 +238,3 @@ class HrdSolver(object):
 if __name__ == '__main__':
     solver = HrdSolver("BAABBAABBCCBBDDBD  D")
     pl.show()
-    #print status2positions("BAABBAABBCCBBDDBD  D")
