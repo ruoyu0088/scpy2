@@ -19,6 +19,7 @@ def isproperty(obj, attr):
     except:
         return False
 
+
 class Graphviz(object):
 
     def node(self, obj):
@@ -33,6 +34,11 @@ class Graphviz(object):
             color = "gray"            
         else:
             label = obj.__class__.__name__
+            format_func = getattr(self, "format_%s" % label, None)
+            if format_func is not None:
+                text = format_func(obj)
+                self.result.append(text)
+                return
             color = "white"
         text = 'obj_%d[label="%s",fillcolor=%s];' % (id(obj), label, color)
         self.result.append(text)
@@ -128,3 +134,19 @@ class GraphvizMatplotlib(Graphviz):
     
     expand_classes = {"Figure", "Axes", "Line2D", "Text"}
     expand_once_classes = {"XAxis", "YAxis",  "XTick", "YTick"}
+
+
+class GraphvizMPLTransform(Graphviz):
+
+    check_attributes = [
+        "_boxout", "_bbox", "_transform", "_points", "_mtx", "_boxin", "_child", "_x", "_y"]
+
+    expand_classes = {"TransformNode"}
+    expand_once_classes = {}
+
+    def format_ndarray(self, obj):
+        if obj.ndim == 2:
+            html = "".join("<tr>%s</tr>" % "".join("<td>%g</td>" % v for v in row) for row in obj)
+            html = '<table border="0">%s</table>' % html
+        text = '''obj_%d[label=<%s>,fillcolor=white, fontsize=9];''' % (id(obj), html)
+        return text
