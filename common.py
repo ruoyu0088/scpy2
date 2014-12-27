@@ -3,8 +3,10 @@ from __future__ import absolute_import
 import matplotlib.text
 import inspect
 
+
 def issimple(obj):
     return isinstance(obj, (str, unicode, int, long, float))
+
 
 def isempty(obj):
     if obj is None:
@@ -12,6 +14,7 @@ def isempty(obj):
     if isinstance(obj, list) and obj == []:
         return True
     return False
+
 
 def isproperty(obj, attr):
     try:
