@@ -2,7 +2,7 @@
 from functools import wraps
 import numpy as np
 import matplotlib as mpl
-from matplotlib.backends.backend_agg import RendererAgg
+
 
 def drawfunc(func):
     @wraps(func)
@@ -15,13 +15,18 @@ def drawfunc(func):
             if setfunc is not None:
                 setfunc(v)
         artist.figure = self.renderer
+        artist.set_transform(self.trans)
         artist.draw(self.renderer)
         
     return wrap
         
+
 class ImageDrawer(object):
     
-    def __init__(self, arr):
+    def __init__(self, arr, reverse=True):
+        from matplotlib.transforms import Affine2D, IdentityTransform
+        from matplotlib.backends.backend_agg import RendererAgg
+
         self.arr = arr
         self.height, self.width, _ = self.arr.shape
         
@@ -31,6 +36,12 @@ class ImageDrawer(object):
         img.draw(renderer)
         
         self.renderer = renderer
+        
+        if not reverse:
+            self.trans_offset = self.trans = IdentityTransform()
+        else:
+            self.trans_offset = Affine2D().scale(1, -1)
+            self.trans = Affine2D().scale(1, -1).translate(0, self.height)
         self.parameters = {}
         
     def set_parameters(self, **kw):
@@ -83,6 +94,6 @@ class ImageDrawer(object):
         collection = mpl.collections.PathCollection(
                 (path,), size,
                 offsets = zip(x, y),
-                transOffset = mpl.transforms.IdentityTransform()
+                transOffset = self.trans_offset
                 )
         return collection
