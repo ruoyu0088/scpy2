@@ -56,6 +56,7 @@ class HrdSolver(object):
 
     def __init__(self, status):
         self.fig, self.ax = pl.subplots(figsize=(4, 5))
+        self.fig.canvas.set_window_title(u'华容道求解器')
         self.fig.patch.set_facecolor("white")
         self.fig.canvas.mpl_connect("key_press_event", self.on_key)
         self.fig.canvas.mpl_connect("button_press_event", self.on_press)
@@ -236,5 +237,10 @@ class HrdSolver(object):
 
 
 if __name__ == '__main__':
-    solver = HrdSolver("BAABBAABBCCBBDDBD  D")
+    import sys
+    try:
+        board = sys.argv[1]
+    except:
+        board = "BAABBAABBCCBBDDBD  D"
+    solver = HrdSolver(board)
     pl.show()
