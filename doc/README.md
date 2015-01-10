@@ -3,6 +3,32 @@
 
 `scpy2`为Python科学计算第二版的实例代码集，其中的包含许多演示代码以及一些实用的模块。
 
+## Scipy
+
+### 解华容道
+
+演示如何使用`scipy.sparse.csgraph`解华容道谜题。4种方块分别使用ABCD四个符号表示，空格表示无方块，例如标准开局为：
+
+    BAAB
+    BAAB
+    BCCB
+    BDDB
+    D  D
+
+使用字符串`BAABBAABBCCBBDDBD  D`表示。
+
+这种布局一共有1个A、4个B、1个C和4个D方块，首先运行如下程序产生这些方块的所有布局：
+
+
+    !python -m scpy2.scipy.hrd ABBBBCDDDD
+
+然后运行如下命令对横刀立马布局`BAABBAABBCCBBDDBD D`求解，该程序使用matplotlib制作界面。按箭头演示解题步骤，按空格键播放/暂停。
+
+![华容道求解器的界面](images/hrd.png "")
+
+
+    !python -m scpy2.scipy.hrd_solver "BAABBAABBCCBBDDBD  D"
+
 ## Cython
 
 ### 多关键字搜索
