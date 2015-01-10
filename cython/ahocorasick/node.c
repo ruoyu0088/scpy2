@@ -2,7 +2,7 @@
  * node.c: implementation of automata node
  * This file is part of multifast.
  *
-    Copyright 2010-2012 Kamiar Kanani <kamiar.kanani@gmail.com>
+    Copyright 2010-2013 Kamiar Kanani <kamiar.kanani@gmail.com>
 
     multifast is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -24,13 +24,14 @@
 #include "node.h"
 
 /* reallocation step for AC_NODE_t.matched_patterns */
-#define REALLOC_CHUNK_MATCHSTR 8
+#define REALLOC_CHUNK_MATCHSTR 1
 
 /* reallocation step for AC_NODE_t.outgoing array */
-#define REALLOC_CHUNK_OUTGOING 8
-/* TODO: For different depth of node, number of outgoing edges differs
-considerably, It is efficient to use different chunk size for 
-different depths */
+#define REALLOC_CHUNK_OUTGOING 1
+/* For different node depth, number of outgoing edges differs considerably 
+ * if you care about preprocessing speed, you can set a higher value for 
+ * reallocation step size to prevent multiple reallocations.
+ */
 
 /* Private function prototype */
 void node_init         (AC_NODE_t * thiz);
@@ -42,13 +43,13 @@ int  node_has_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * newstr);
  * FUNCTION: node_create
  * Create the node
 ******************************************************************************/
-struct node * node_create(void)
+struct AC_NODE * node_create(void)
 {
-	AC_NODE_t * thiz;
-	thiz = (AC_NODE_t *) malloc (sizeof(AC_NODE_t));
-	node_init(thiz);
-	node_assign_id(thiz);
-	return thiz;
+    AC_NODE_t * thiz;
+    thiz = (AC_NODE_t *) malloc (sizeof(AC_NODE_t));
+    node_init(thiz);
+    node_assign_id(thiz);
+    return thiz;
 }
 
 /******************************************************************************
@@ -57,15 +58,15 @@ struct node * node_create(void)
 ******************************************************************************/
 void node_init(AC_NODE_t * thiz)
 {
-	memset(thiz, 0, sizeof(AC_NODE_t));
+    memset(thiz, 0, sizeof(AC_NODE_t));
 
-	thiz->outgoing_max = REALLOC_CHUNK_OUTGOING;
-	thiz->outgoing = (struct edge *) malloc
-			(thiz->outgoing_max*sizeof(struct edge));
+    thiz->outgoing_max = REALLOC_CHUNK_OUTGOING;
+    thiz->outgoing = (struct edge *) malloc
+            (thiz->outgoing_max*sizeof(struct edge));
 
-	thiz->matched_patterns_max = REALLOC_CHUNK_MATCHSTR;
-	thiz->matched_patterns = (AC_PATTERN_t *) malloc
-			(thiz->matched_patterns_max*sizeof(AC_PATTERN_t));
+    thiz->matched_patterns_max = REALLOC_CHUNK_MATCHSTR;
+    thiz->matched_patterns = (AC_PATTERN_t *) malloc
+            (thiz->matched_patterns_max*sizeof(AC_PATTERN_t));
 }
 
 /******************************************************************************
@@ -74,9 +75,9 @@ void node_init(AC_NODE_t * thiz)
 ******************************************************************************/
 void node_release(AC_NODE_t * thiz)
 {
-	free(thiz->matched_patterns);
-	free(thiz->outgoing);
-	free(thiz);
+    free(thiz->matched_patterns);
+    free(thiz->outgoing);
+    free(thiz);
 }
 
 /******************************************************************************
@@ -87,14 +88,14 @@ void node_release(AC_NODE_t * thiz)
 ******************************************************************************/
 AC_NODE_t * node_find_next(AC_NODE_t * thiz, AC_ALPHABET_t alpha)
 {
-	int i;
+    int i;
 
-	for (i=0; i < thiz->outgoing_degree; i++)
-	{
-		if(thiz->outgoing[i].alpha == alpha)
-			return (thiz->outgoing[i].next);
-	}
-	return NULL;
+    for (i=0; i < thiz->outgoing_degree; i++)
+    {
+        if(thiz->outgoing[i].alpha == alpha)
+            return (thiz->outgoing[i].next);
+    }
+    return NULL;
 }
 
 /******************************************************************************
@@ -104,24 +105,24 @@ AC_NODE_t * node_find_next(AC_NODE_t * thiz, AC_ALPHABET_t alpha)
 ******************************************************************************/
 AC_NODE_t * node_findbs_next (AC_NODE_t * thiz, AC_ALPHABET_t alpha)
 {
-	int min, max, mid;
-	AC_ALPHABET_t amid;
+    int min, max, mid;
+    AC_ALPHABET_t amid;
 
-	min = 0;
-	max = thiz->outgoing_degree - 1;
+    min = 0;
+    max = thiz->outgoing_degree - 1;
 
-	while (min <= max)
-	{
-		mid = (min+max) >> 1;
-		amid = thiz->outgoing[mid].alpha;
-		if (alpha > amid)
-			min = mid + 1;
-		else if (alpha < amid)
-			max = mid - 1;
-		else
-			return (thiz->outgoing[mid].next);
-	}
-	return NULL;
+    while (min <= max)
+    {
+        mid = (min+max) >> 1;
+        amid = thiz->outgoing[mid].alpha;
+        if (alpha > amid)
+            min = mid + 1;
+        else if (alpha < amid)
+            max = mid - 1;
+        else
+            return (thiz->outgoing[mid].next);
+    }
+    return NULL;
 }
 
 /******************************************************************************
@@ -131,24 +132,24 @@ AC_NODE_t * node_findbs_next (AC_NODE_t * thiz, AC_ALPHABET_t alpha)
 ******************************************************************************/
 int node_has_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * newstr)
 {
-	int i, j;
-	AC_PATTERN_t * str;
+    int i, j;
+    AC_PATTERN_t * str;
 
-	for (i=0; i < thiz->matched_patterns_num; i++)
-	{
-		str = &thiz->matched_patterns[i];
+    for (i=0; i < thiz->matched_patterns_num; i++)
+    {
+        str = &thiz->matched_patterns[i];
 
-		if (str->length != newstr->length)
-			continue;
+        if (str->length != newstr->length)
+            continue;
 
-		for (j=0; j<str->length; j++)
-			if(str->astring[j] != newstr->astring[j])
-				continue;
+        for (j=0; j<str->length; j++)
+            if(str->astring[j] != newstr->astring[j])
+                continue;
 
-		if (j == str->length)
-			return 1;
-	}
-	return 0;
+        if (j == str->length)
+            return 1;
+    }
+    return 0;
 }
 
 /******************************************************************************
@@ -157,16 +158,16 @@ int node_has_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * newstr)
 ******************************************************************************/
 AC_NODE_t * node_create_next (AC_NODE_t * thiz, AC_ALPHABET_t alpha)
 {
-	AC_NODE_t * next;
-	next = node_find_next (thiz, alpha);
-	if (next)
-	/* The edge already exists */
-		return NULL;
-	/* Otherwise register new edge */
-	next = node_create ();
-	node_register_outgoing(thiz, next, alpha);
+    AC_NODE_t * next;
+    next = node_find_next (thiz, alpha);
+    if (next)
+    /* The edge already exists */
+        return NULL;
+    /* Otherwise register new edge */
+    next = node_create ();
+    node_register_outgoing(thiz, next, alpha);
 
-	return next;
+    return next;
 }
 
 /******************************************************************************
@@ -175,22 +176,22 @@ AC_NODE_t * node_create_next (AC_NODE_t * thiz, AC_ALPHABET_t alpha)
 ******************************************************************************/
 void node_register_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * str)
 {
-	/* Check if the new pattern already exists in the node list */
-	if (node_has_matchstr(thiz, str))
-		return;
+    /* Check if the new pattern already exists in the node list */
+    if (node_has_matchstr(thiz, str))
+        return;
 
-	/* Manage memory */
-	if (thiz->matched_patterns_num >= thiz->matched_patterns_max)
-	{
-		thiz->matched_patterns_max += REALLOC_CHUNK_MATCHSTR;
-		thiz->matched_patterns = (AC_PATTERN_t *) realloc 
-			(thiz->matched_patterns, thiz->matched_patterns_max*sizeof(AC_PATTERN_t));
-	}
+    /* Manage memory */
+    if (thiz->matched_patterns_num >= thiz->matched_patterns_max)
+    {
+        thiz->matched_patterns_max += REALLOC_CHUNK_MATCHSTR;
+        thiz->matched_patterns = (AC_PATTERN_t *) realloc 
+            (thiz->matched_patterns, thiz->matched_patterns_max*sizeof(AC_PATTERN_t));
+    }
 
-	thiz->matched_patterns[thiz->matched_patterns_num].astring = str->astring;
-	thiz->matched_patterns[thiz->matched_patterns_num].length = str->length;
-	thiz->matched_patterns[thiz->matched_patterns_num].rep = str->rep;
-	thiz->matched_patterns_num++;
+    thiz->matched_patterns[thiz->matched_patterns_num].astring = str->astring;
+    thiz->matched_patterns[thiz->matched_patterns_num].length = str->length;
+    thiz->matched_patterns[thiz->matched_patterns_num].rep = str->rep;
+    thiz->matched_patterns_num++;
 }
 
 /******************************************************************************
@@ -198,17 +199,17 @@ void node_register_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * str)
  * Establish an edge between two nodes
 ******************************************************************************/
 void node_register_outgoing
-	(AC_NODE_t * thiz, AC_NODE_t * next, AC_ALPHABET_t alpha)
+    (AC_NODE_t * thiz, AC_NODE_t * next, AC_ALPHABET_t alpha)
 {
-	if(thiz->outgoing_degree >= thiz->outgoing_max)
-	{
-		thiz->outgoing_max += REALLOC_CHUNK_OUTGOING;
-		thiz->outgoing = (struct edge *) realloc 
-			(thiz->outgoing, thiz->outgoing_max*sizeof(struct edge));
-	}
+    if(thiz->outgoing_degree >= thiz->outgoing_max)
+    {
+        thiz->outgoing_max += REALLOC_CHUNK_OUTGOING;
+        thiz->outgoing = (struct edge *) realloc 
+            (thiz->outgoing, thiz->outgoing_max*sizeof(struct edge));
+    }
 
-	thiz->outgoing[thiz->outgoing_degree].alpha = alpha;
-	thiz->outgoing[thiz->outgoing_degree++].next = next;
+    thiz->outgoing[thiz->outgoing_degree].alpha = alpha;
+    thiz->outgoing[thiz->outgoing_degree++].next = next;
 }
 
 /******************************************************************************
@@ -217,8 +218,8 @@ void node_register_outgoing
 ******************************************************************************/
 void node_assign_id (AC_NODE_t * thiz)
 {
-	static int unique_id = 1;
-	thiz->id = unique_id ++;
+    static int unique_id = 1;
+    thiz->id = unique_id ++;
 }
 
 /******************************************************************************
@@ -227,19 +228,19 @@ void node_assign_id (AC_NODE_t * thiz)
 ******************************************************************************/
 int node_edge_compare (const void * l, const void * r)
 {
-	/* According to man page:
-	 * The comparison function must return an integer less than, equal to, or
-	 * greater than zero if the first argument is considered to be
-	 * respectively less than, equal to, or greater than the second. if  two
-	 * members compare as equal, their order in the sorted array is undefined.
-	 *
-	 * NOTE: Because edge alphabets are unique in every node we ignore
-	 * equivalence case.
-	**/
-	if ( ((struct edge *)l)->alpha >= ((struct edge *)r)->alpha )
-		return 1;
-	else
-		return -1;
+    /* According to man page:
+     * The comparison function must return an integer less than, equal to, or
+     * greater than zero if the first argument is considered to be
+     * respectively less than, equal to, or greater than the second. if  two
+     * members compare as equal, their order in the sorted array is undefined.
+     *
+     * NOTE: Because edge alphabets are unique in every node we ignore
+     * equivalence case.
+    **/
+    if ( ((struct edge *)l)->alpha >= ((struct edge *)r)->alpha )
+        return 1;
+    else
+        return -1;
 }
 
 /******************************************************************************
@@ -248,6 +249,6 @@ int node_edge_compare (const void * l, const void * r)
 ******************************************************************************/
 void node_sort_edges (AC_NODE_t * thiz)
 {
-	qsort ((void *)thiz->outgoing, thiz->outgoing_degree, sizeof(struct edge),
-			node_edge_compare);
+    qsort ((void *)thiz->outgoing, thiz->outgoing_degree, sizeof(struct edge),
+            node_edge_compare);
 }

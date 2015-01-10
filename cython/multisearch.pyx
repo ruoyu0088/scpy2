@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 ###1###
 cdef extern from "ahocorasick.h": #❶
-    ctypedef int (*MATCH_CALBACK_f)(AC_MATCH_t *, void *) #❷
-    
-    ctypedef enum AC_ERROR_t: #❸
+    ctypedef int (*AC_MATCH_CALBACK_f)(AC_MATCH_t *, void *) #❷
+    ctypedef enum AC_STATUS_t: #❸
         ACERR_SUCCESS = 0
         ACERR_DUPLICATE_PATTERN
         ACERR_LONG_PATTERN
@@ -16,7 +16,6 @@ cdef extern from "ahocorasick.h": #❶
 
     ctypedef struct AC_AUTOMATA_t:
         AC_MATCH_t match
-        MATCH_CALBACK_f match_callback
 
     ctypedef struct AC_PATTERN_t:
         char * astring
@@ -26,14 +25,16 @@ cdef extern from "ahocorasick.h": #❶
         char * astring
         unsigned int length
 
-    AC_AUTOMATA_t * ac_automata_init(MATCH_CALBACK_f mc) #❺
-    AC_ERROR_t ac_automata_add(AC_AUTOMATA_t * thiz, AC_PATTERN_t * pattern)
+    AC_AUTOMATA_t * ac_automata_init() #❺
+    AC_STATUS_t ac_automata_add(AC_AUTOMATA_t * thiz, AC_PATTERN_t * pattern)
     void ac_automata_finalize(AC_AUTOMATA_t * thiz)
-    int ac_automata_search(AC_AUTOMATA_t * thiz, AC_TEXT_t * text, void * param)
-    void ac_automata_reset(AC_AUTOMATA_t * thiz)
+    int ac_automata_search(AC_AUTOMATA_t * thiz, AC_TEXT_t * text, int keep, 
+        AC_MATCH_CALBACK_f callback, void * param)
+    void ac_automata_settext (AC_AUTOMATA_t * thiz, AC_TEXT_t * text, int keep)
+    AC_MATCH_t * ac_automata_findnext (AC_AUTOMATA_t * thiz)        
     void ac_automata_release(AC_AUTOMATA_t * thiz)
-###1###    
-    
+###1###
+
 ###4###
 cdef int isin_callback(AC_MATCH_t * match, void * param):
     cdef MultiSearch ms = <MultiSearch> param
@@ -46,7 +47,7 @@ cdef int search_callback(AC_MATCH_t * match, void * param):
     cdef bytes pattern = match.patterns.astring
     cdef int res = 1
     try:
-        res = ms.callback(pattern, match.position - len(pattern))
+        res = ms.callback(match.position - len(pattern), pattern)
     except Exception as ex:
         import sys
         ms.exc_info = sys.exc_info()
@@ -62,7 +63,7 @@ cdef class MultiSearch:
     cdef object exc_info
 
     def __cinit__(self, keywords):
-        self._auto = ac_automata_init(NULL)
+        self._auto = ac_automata_init()
         if self._auto is NULL:
             raise MemoryError
         self.add(keywords) #❷
@@ -74,7 +75,7 @@ cdef class MultiSearch:
     cdef add(self, keywords):
         cdef AC_PATTERN_t pattern
         cdef bytes keyword
-        cdef AC_ERROR_t err
+        cdef AC_STATUS_t err
         
         for keyword in keywords: #❸
             pattern.astring = <char *>keyword
@@ -92,9 +93,7 @@ cdef class MultiSearch:
         temp_text.astring = <char *>text
         temp_text.length = len(text)
         self.found = False
-        self._auto.match_callback = isin_callback
-        ac_automata_search(self._auto, &temp_text, <void *>self)
-        ac_automata_reset(self._auto)
+        ac_automata_search(self._auto, &temp_text, 0, isin_callback, <void *>self)
         return self.found
 ###3###
 
@@ -104,10 +103,25 @@ cdef class MultiSearch:
         temp_text.astring = <char *>text
         temp_text.length = len(text)
         self.found = False
-        self._auto.match_callback = search_callback
         self.callback = callback
         self.exc_info = None
-        ac_automata_search(self._auto, &temp_text, <void *>self)
+        ac_automata_search(self._auto, &temp_text, 0, search_callback, <void *>self)
         if self.exc_info is not None:
             raise self.exc_info[1], None, self.exc_info[2]
 ###5###
+###6###
+    def iter_search(self, bytes text):
+        cdef AC_TEXT_t temp_text
+        cdef AC_MATCH_t * match
+        cdef bytes matched_pattern
+        temp_text.astring = <char *>text
+        temp_text.length = len(text)
+        self.found = False
+        ac_automata_settext(self._auto, &temp_text, 0)
+        while True:
+            match = ac_automata_findnext(self._auto)
+            if match == NULL:
+                break
+            matched_pattern = <bytes>match.patterns.astring
+            yield match.position - len(matched_pattern), matched_pattern
+###6###
