@@ -53,3 +53,30 @@ ourceforge.net/projects/multifast/)。它能对文本使用多个关键词进行
     3 abc
     9 xyz
     
+
+## 写作工具
+
+### 生成结构图
+
+`GraphvizDataFrame, GraphvizMatplotlib, GraphvizMPLTransform`三个类用于生成对象结构图：
+
+
+    %matplotlib inline
+    import pylab as pl
+    fig, ax = pl.subplots()
+    ax.plot([1, 2, 3])
+    
+    from scpy2 import GraphvizMatplotlib
+    dot = GraphvizMatplotlib.graphviz(fig)
+    %dot dot
+
+
+![svg](README_files/README_15_0.svg)
+
+
+
+![png](README_files/README_15_1.png)
+
+
+
+    
