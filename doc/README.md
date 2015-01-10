@@ -68,15 +68,12 @@ ourceforge.net/projects/multifast/)。它能对文本使用多个关键词进行
     
     from scpy2 import GraphvizMatplotlib
     dot = GraphvizMatplotlib.graphviz(fig)
-    %dot dot
+    %dot -f png dot
 
 
-![svg](README_files/README_15_0.svg)
+![png](README_files/README_15_0.png)
 
 
 
 ![png](README_files/README_15_1.png)
 
-
-
-    
