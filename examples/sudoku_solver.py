@@ -47,6 +47,7 @@ class SudokuBoard(object):
     def __init__(self):
 
         self.fig = plt.figure(figsize=(5, 5))
+        self.fig.canvas.set_window_title(u'数独求解器')
         ax = self.fig.add_subplot(1, 1, 1)
         ax.set_aspect("equal")
         ax.set_axis_off()
