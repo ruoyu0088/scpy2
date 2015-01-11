@@ -29,6 +29,10 @@
 
     !python -m scpy2.scipy.hrd_solver "BAABBAABBCCBBDDBD  D"
 
+## matplotlib
+
+[matplotlib相关演示程序的文档](matplotlib.md)
+
 ## Cython
 
 ### 多关键字搜索
@@ -71,9 +75,9 @@ ourceforge.net/projects/multifast/)。它能对文本使用多个关键词进行
     %dot -f png dot
 
 
-![png](README_files/README_15_0.png)
+![png](README_files/README_17_0.png)
 
 
 
-![png](README_files/README_15_1.png)
+![png](README_files/README_17_1.png)
 
