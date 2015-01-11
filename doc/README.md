@@ -58,6 +58,45 @@ ourceforge.net/projects/multifast/)。它能对文本使用多个关键词进行
     9 xyz
     
 
+## 实例篇
+
+### cycosat
+
+用Cython包装C语言的SAT问题求解器PicoSAT，并使用该扩展模块解决数独游戏和扫雷游戏。
+
+ > http://fmv.jku.at/picosat/
+
+例如如下问题：
+
+有四位嫌疑犯，他们做了如下供述：
+
+* 甲：不是我作案的。
+* 乙：丁就是罪犯。
+* 丙：乙是罪犯。
+* 丁：乙有意诬陷我。
+
+已知四个人当中只有一个说了真话。请推理出罪犯是谁？
+
+
+    from scpy2.cycosat import CoSAT
+    
+    sat = CoSAT()
+    problem = [[1, -4], [1, -2], [1, 4], [-4, -2],
+               [-4, 4], [-2, 4], [-1, 4, 2, -4]]
+    
+    sat.add_clauses(problem)
+    print sat.solve()
+
+    [1, -1, -1, -1]
+    
+
+用`CoSAT`解数独游戏，按方向键移动光标，按数字键指定当前光标所在方格中的数字，0表示删除。黑色数字表示用户指定的数字，灰色数字为求解器的解。
+
+![数独游戏求解器](images/sudoku.png "")
+
+
+    %exec_python -m scpy2.examples.sudoku_solver
+
 ## 写作工具
 
 ### 生成结构图
@@ -75,9 +114,9 @@ ourceforge.net/projects/multifast/)。它能对文本使用多个关键词进行
     %dot -f png dot
 
 
-![png](README_files/README_17_0.png)
+![png](README_files/README_23_0.png)
 
 
 
-![png](README_files/README_17_1.png)
+![png](README_files/README_23_1.png)
 
