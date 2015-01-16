@@ -25,7 +25,8 @@ cdef extern from "ahocorasick.h": #❶
         char * astring
         unsigned int length
 
-    AC_AUTOMATA_t * ac_automata_init() #❺
+    #❺
+    AC_AUTOMATA_t * ac_automata_init() 
     AC_STATUS_t ac_automata_add(AC_AUTOMATA_t * thiz, AC_PATTERN_t * pattern)
     void ac_automata_finalize(AC_AUTOMATA_t * thiz)
     int ac_automata_search(AC_AUTOMATA_t * thiz, AC_TEXT_t * text, int keep, 
@@ -88,40 +89,39 @@ cdef class MultiSearch:
 ###2###
 
 ###3###
-    def isin(self, bytes text):
+    def isin(self, bytes text, bint keep=False):
         cdef AC_TEXT_t temp_text
         temp_text.astring = <char *>text
         temp_text.length = len(text)
         self.found = False
-        ac_automata_search(self._auto, &temp_text, 0, isin_callback, <void *>self)
+        ac_automata_search(self._auto, &temp_text, keep, isin_callback, <void *>self)
         return self.found
 ###3###
 
 ###5###
-    def search(self, bytes text, callback):
+    def search(self, bytes text, callback, bint keep=False):
         cdef AC_TEXT_t temp_text
         temp_text.astring = <char *>text
         temp_text.length = len(text)
         self.found = False
         self.callback = callback
         self.exc_info = None
-        ac_automata_search(self._auto, &temp_text, 0, search_callback, <void *>self)
+        ac_automata_search(self._auto, &temp_text, keep, search_callback, <void *>self)
         if self.exc_info is not None:
             raise self.exc_info[1], None, self.exc_info[2]
 ###5###
-###6###
-    def iter_search(self, bytes text):
+###7###
+    def iter_search(self, bytes text, bint keep=False):
         cdef AC_TEXT_t temp_text
         cdef AC_MATCH_t * match
         cdef bytes matched_pattern
         temp_text.astring = <char *>text
         temp_text.length = len(text)
-        self.found = False
-        ac_automata_settext(self._auto, &temp_text, 0)
+        ac_automata_settext(self._auto, &temp_text, keep)
         while True:
             match = ac_automata_findnext(self._auto)
             if match == NULL:
                 break
             matched_pattern = <bytes>match.patterns.astring
             yield match.position - len(matched_pattern), matched_pattern
-###6###
+###7###
