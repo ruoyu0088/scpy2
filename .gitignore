@@ -6,3 +6,5 @@
 build
 temp
 .ipynb_checkpoints
+*.exe
+cython/multisearch.c
