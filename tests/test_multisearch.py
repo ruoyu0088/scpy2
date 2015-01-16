@@ -50,6 +50,17 @@ def multi_iter_search(words, text, ms=None):
     return results
 
 
+def multi_iter_search_with_keep(words, texts, ms=None):
+    from itertools import chain
+    if ms is None:
+        ms = MultiSearch(words)
+
+    results = []
+    for text in texts:
+        results.extend(ms.iter_search(text, keep=True))
+    results.sort()
+    return results
+
 def test_search():
     for n in range(1, 200):
         words = make_words(n)
@@ -84,6 +95,27 @@ def test_iter_search():
         res2 = multi_iter_search(words, text)
         assert res1 == res2
 
+
+def random_split_text(text, count):
+    from random import randint
+    pos = sorted(set((randint(0, len(text)-2) for i in range(count))))
+    pos.insert(0, 0)
+    pos.append(len(text))
+
+    texts = []
+    for s, e in zip(pos[:-1], pos[1:]):
+        texts.append(text[s:e])
+
+    return texts
+
+def test_keep():
+    words = make_words(200)
+    res1 = multi_iter_search(words, text)
+
+    texts = random_split_text(text, 20)
+
+    res2 = multi_iter_search_with_keep(words, texts)
+    assert res1 == res2
 
 if __name__ == '__main__':
     test_search()
