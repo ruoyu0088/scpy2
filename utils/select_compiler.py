@@ -5,8 +5,37 @@ from collections import OrderedDict
 from ConfigParser import ConfigParser
 import _winreg
 from distutils.msvc9compiler import find_vcvarsall
+import setuptools
 
 HCU = _winreg.HKEY_CURRENT_USER
+
+
+def show_compiler():
+    from distutils.core import Distribution
+    dist = Distribution()
+    dist.parse_config_files()
+    opt = dist.command_options
+    try:
+        fn, compiler_name = opt["build"]["compiler"]
+    except:
+        from distutils.ccompiler import get_default_compiler
+        fn = "default"
+        compiler_name = get_default_compiler()
+
+    from distutils import ccompiler
+    version = ""
+    if compiler_name == "msvc":
+        compiler = ccompiler.new_compiler(compiler=compiler_name)
+        version = str(compiler._MSVCCompiler__version)
+    print "{} {} defined by {}".format(compiler_name, version, fn)
+
+
+def set_msc_version(version):
+    import sys
+    import re
+    from distutils import msvc9compiler
+    sys.version = re.sub(r"MSC v.(\d\d\d\d)", r"MSC v.{:02d}00".format(version+6), sys.version)
+    msvc9compiler.VERSION = msvc9compiler.get_build_version()
 
 
 def read_config(fn):
@@ -34,6 +63,11 @@ def write_config(fn, config):
 
 
 def set_compiler(compiler):
+    """
+    change default compiler by modify distutils.cfg
+
+    :param compiler: mingw32 or msvc"
+    """
     from os import path
     sys_dir = path.dirname(sys.modules['distutils'].__file__)
     sys_file = path.join(sys_dir, "distutils.cfg")
@@ -45,10 +79,21 @@ def set_compiler(compiler):
     write_config(sys_file, config)
 
 
-def get_vc_dir():
-    user_dir = os.environ["USERPROFILE"]
-    vc_dir = path.join(user_dir, r"AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0")
-    return vc_dir
+def get_vc9_dir():
+    import distutils
+    Reg = distutils.msvc9compiler.Reg
+    VC_BASE = r'Software\%sMicrosoft\DevDiv\VCForPython\%0.1f'
+    version = 9
+    key = VC_BASE % ('', version)
+    try:
+        productdir = Reg.get_value(key, "installdir")
+    except KeyError:
+        try:
+            key = VC_BASE % ('Wow6432Node\\', version)
+            productdir = Reg.get_value(key, "installdir")
+        except KeyError:
+            productdir = None
+    return productdir.rstrip()
 
 
 def add_vc9_reg(vc_dir):
@@ -75,7 +120,7 @@ def select_mingw32():
 
 def select_msvcpy():
     set_compiler("msvc")
-    vc_dir = get_vc_dir()
+    vc_dir = get_vc9_dir()
     if not path.exists(vc_dir):
         print vc_dir, "not exists"
         print "Please install Visual C++ for Python first"
