@@ -1,10 +1,9 @@
-###8###
 #cython: boundscheck=False
 #cython: wraparound=False
 
 cimport cython
 from cpython cimport mem
-
+###8###
 cdef add_array(double *op1, double *op2, double *res, int count):
     cdef int i
     for i in range(count):
