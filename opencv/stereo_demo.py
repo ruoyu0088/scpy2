@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from os import path
 import numpy as np
 import cv2
 from traits.api import HasTraits, Instance, Button
@@ -10,6 +11,7 @@ from tvtk.pyface.scene_model import SceneModel
 from matplotlib.figure import Figure
 from scpy2.traitslib import MPLFigureEditor
 
+FOLDER = path.join(path.dirname(__file__), "stereo")
 
 class StereoDemo(HasTraits):
     update_button = Button(u"Update")
@@ -41,9 +43,8 @@ class StereoDemo(HasTraits):
         self.calc()
 
     def calc(self):
-        print "calc"
-        img_left = cv2.pyrDown(cv2.imread('stereo/aloeL.jpg'))
-        img_right = cv2.pyrDown(cv2.imread('stereo/aloeR.jpg'))
+        img_left = cv2.pyrDown(cv2.imread(path.join(FOLDER, 'aloeL.jpg')))
+        img_right = cv2.pyrDown(cv2.imread(path.join(FOLDER, 'aloeR.jpg')))
 
         img_left = cv2.cvtColor(img_left, cv2.COLOR_BGR2RGB)
         img_right = cv2.cvtColor(img_right, cv2.COLOR_BGR2RGB)
