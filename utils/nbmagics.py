@@ -22,6 +22,9 @@ def install_magics():
             return _pretty(obj)
 
     def show_arrays(arrays):
+        from scpy2.utils.image import concat_images, display_image
+        return display_image(concat_images(arrays))
+        
         import io
         from matplotlib.image import imsave
         from IPython import display
@@ -471,15 +474,17 @@ def install_magics():
     def get_section(filepath, section):
         from os import path
         import scpy2
-        section = "###{}###".format(section)
+        section_mark = "###{}###".format(section)
         lines = []
         flag = False
-        for line in file(path.join(path.dirname(scpy2.__file__), filepath)):
-            if not flag and line.startswith(section):
+        if section == 0:
+            flag = True
+        for line in open(path.join(path.dirname(scpy2.__file__), filepath)):
+            if not flag and line.startswith(section_mark):
                 flag = True
                 continue
             if flag:
-                if line.startswith(section):
+                if line.startswith(section_mark):
                     break
                 lines.append(line)
         return "".join(lines).rstrip()
@@ -487,7 +492,11 @@ def install_magics():
     @register_cell_magic
     def include(line, cell):
         import json
-        language, filepath, section = line.split()
+        try:
+            language, filepath, section = line.split()
+        except ValueError:
+            language, filepath = line.split()
+            section = 0
         section = int(section)
         first_line = "%%include " + line
         section_text = get_section(filepath, section)
