@@ -128,13 +128,20 @@ class ImageProcessDemo(HasTraits):
 
     def load_settings(self, setting):
         for attr in self.SETTINGS:
-            value = setting[attr]
+            try:
+                value = setting[attr]
+            except KeyError:
+                continue
             now_value = getattr(self, attr)
             if isinstance(now_value, np.ndarray):
                 value = np.array(value)
             elif isinstance(now_value, tuple):
                 value = tuple(value)
             setattr(self, attr, value)
+        self.settings_loaded()
+
+    def settings_loaded(self):
+        pass
 
     def on_position(self):
         self.init_timer()
