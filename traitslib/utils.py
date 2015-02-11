@@ -53,7 +53,12 @@ class SettingManager(HasTraits):
 
         klass = self.target.__class__
         folder = path.dirname(inspect.getabsfile(klass))
-        return path.join(folder, klass.__name__.lower() + ".json")
+        filename = klass.__name__.lower() + ".json"
+        setting_folder = path.join(folder, "settings")
+        if path.exists(setting_folder):
+            return path.join(setting_folder, filename)
+        else:
+            return path.join(folder, filename)
 
     def _save_button_fired(self):
         ask = AskName(name=self.current_name)
