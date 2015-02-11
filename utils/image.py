@@ -6,9 +6,8 @@ def rotate(src, angle):
     return cv2.warpAffine(src, m, (w, h), flags=cv2.INTER_CUBIC)
 
 
-def concat_images(images):
+def concat_images(images, margin=10):
     import numpy as np
-    margin = 10
     width = sum(img.shape[1] for img in images) + (len(images)-1)*margin
     height = max(img.shape[0] for img in images)
     image = np.empty((height, width, 3), dtype=np.uint8)
