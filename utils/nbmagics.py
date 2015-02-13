@@ -24,7 +24,7 @@ def install_magics():
     def show_arrays(arrays):
         from scpy2.utils.image import concat_images, display_image
         return display_image(concat_images(arrays))
-        
+
         import io
         from matplotlib.image import imsave
         from IPython import display
@@ -552,6 +552,41 @@ def install_magics():
         from scpy2 import vtk_scene_to_array
         img = vtk_scene_to_array(scene.scene)
         return show_arrays([img])
+
+    @register_cell_magic
+    def thread(line, cell):
+        import threading
+        ip = get_ipython()
+        env = ip.user_global_ns
+
+        def f():
+            exec cell in env
+
+        thread = threading.Thread(target=f, name="__magic_thread__" + line)
+        thread.start()
+
+    @register_line_magic
+    def search(line):
+        from types import ModuleType
+        sep = " in "
+        ip = get_ipython()
+        env = ip.user_global_ns
+
+        if sep not in line:
+            keyword = line
+            target = env
+        else:
+            keyword, modules = line.split(sep)
+            target = {name.strip():env[name.strip()] for name in modules.split(",")}
+
+        keyword = keyword.strip().lower()
+
+        for key, value in target.iteritems():
+            if isinstance(value, ModuleType):
+                for name in dir(value):
+                    if keyword in name.lower():
+                        print "{}.{}".format(key, name)
+
 
     ip = get_ipython()
     ip.register_magics(CythonPartsMagic)
