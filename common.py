@@ -22,16 +22,21 @@ def isproperty(obj, attr):
         return False
 
 
+def trans(key):
+    import string
+    return str(key).translate(None, string.punctuation)
+
+
 class Graphviz(object):
 
     def node(self, obj):
         if isempty(obj): return
         self.visited_obj.append(obj)
-        if type(obj) in (list, tuple):
+        if isinstance(obj, (list, tuple)):
             label="|".join("<f%d> %s" % (i, repr(v) if issimple(v) else "*") for i, v in enumerate(obj))
             color = "gray"
-        elif type(obj) is dict:
-            label="|".join("<f%s> %s" % (key, str(key) + ":" + repr(val) 
+        elif isinstance(obj, dict):
+            label="|".join("<f%s> %s" % (key, trans(key) + ":" + repr(val)
                                          if issimple(val) else key) for key, val in obj.items())
             color = "gray"            
         else:
@@ -63,7 +68,7 @@ class Graphviz(object):
     def dict_link(self, adict, key, obj):
         if isempty(obj): return
         if issimple(obj): return
-        text = "obj_%d:f%s -> obj_%d;" % (id(adict), key, id(obj))
+        text = "obj_%d:f%s -> obj_%d;" % (id(adict), trans(key), id(obj))
         self.result.append(text)
 
     def __init__(self):
@@ -77,12 +82,12 @@ class Graphviz(object):
         if issimple(obj): return        
         self.node(obj)
         self.checked_ids.add(id(obj))
-        if type(obj) in (list, tuple):
+        if isinstance(obj, (list, tuple)):
             for idx, inner in enumerate(obj):
                 self._graphviz(inner)
                 self.list_link(obj, idx, inner)
             return
-        if type(obj) is dict:
+        if isinstance(obj,  dict):
             for key, inner in obj.iteritems():
                 self._graphviz(inner)
                 self.dict_link(obj, key, inner)
@@ -120,11 +125,11 @@ edge [fontsize=10, penwidth=0.5];"""
 class GraphvizDataFrame(Graphviz):
     
     check_attributes = ["index", "columns", "values", "name", "_data", 
-                        "blocks", "shape", "_engine", "mapping"]
+                        "blocks", "shape", "_engine", "mapping", "labels", "levels"]
     
     expand_classes = {"tuple"}
-    expand_once_classes = {"Index", "DataFrame", "BlockManager", 
-                           "FloatBlock", "ObjectBlock", "ObjectEngine"}
+    expand_once_classes = {"Index", "DataFrame", "BlockManager", "MultiIndex",
+                           "FloatBlock", "ObjectBlock", "ObjectEngine", "DatetimeBlock"}
 
     
 class GraphvizMatplotlib(Graphviz):
