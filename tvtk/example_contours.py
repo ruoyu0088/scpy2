@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 from example_cut_plane import read_data
 from tvtk.api import tvtk
+from tvtk.common import configure_input
 
 if __name__ == "__main__":      
     plot3d = read_data()
-    contours = tvtk.ContourFilter(input = plot3d.output) 
-    contours.generate_values(8, plot3d.output.point_data.scalars.range) #{1}
-    mapper = tvtk.PolyDataMapper(input = contours.output,
-        scalar_range = plot3d.output.point_data.scalars.range) #{2}
+    grid = plot3d.output.get_block(0)
+
+    contours = tvtk.ContourFilter()
+    configure_input(contours, grid)
+    contours.generate_values(8, grid.point_data.scalars.range)
+    mapper = tvtk.PolyDataMapper(scalar_range = grid.point_data.scalars.range)
+    configure_input(mapper, contours)
     actor = tvtk.Actor(mapper = mapper)
-    actor.property.opacity = 0.3 #{3}
-    
-    # StructuredGridÍø¸ñµÄÍâ¿ò
-    outline = tvtk.StructuredGridOutlineFilter(input = plot3d.output)
-    outline_mapper = tvtk.PolyDataMapper(input = outline.output)
+    #actor.property.opacity = 0.3
+
+    outline = tvtk.StructuredGridOutlineFilter()
+    configure_input(outline, grid)
+    outline_mapper = tvtk.PolyDataMapper()
+    configure_input(outline_mapper, outline)
     outline_actor = tvtk.Actor(mapper = outline_mapper)
     outline_actor.property.color = 0.3, 0.3, 0.3
     
