@@ -4,16 +4,19 @@ sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 
 import os
+from os import path
 os.environ['ETS_TOOLKIT'] = 'qt4'
 
 import numpy as np
 from tvtk.api import tvtk
+from tvtk.common import configure_input
 
 def read_data():
     # 读入数据
-    plot3d = tvtk.PLOT3DReader(
-        xyz_file_name = "combxyz.bin",
-        q_file_name = "combq.bin",
+    folder = path.dirname(__file__)
+    plot3d = tvtk.MultiBlockPLOT3DReader(
+        xyz_file_name = path.join(folder, "combxyz.bin"),
+        q_file_name = path.join(folder, "combq.bin"),
         scalar_function_number = 100, vector_function_number = 200
     )
     plot3d.update()
@@ -21,27 +24,32 @@ def read_data():
 
 if __name__ == "__main__":
     plot3d = read_data()
+    grid = plot3d.output.get_block(0)
 
     # 创建颜色映射表
     lut = tvtk.LookupTable() 
     import pylab as pl
-    lut.table = pl.cm.cool(np.arange(0,256))*255  
+    lut.table = pl.cm.cool(np.arange(0,256))*255
 
     # 显示StructuredGrid中的一个网格面
-    plane = tvtk.StructuredGridGeometryFilter( 
-        input = plot3d.output, extent = (0, 100, 0, 100, 6, 6)
-    )
-    plane_mapper = tvtk.PolyDataMapper(lookup_table = lut, input = plane.output) 
-    plane_mapper.scalar_range = plot3d.output.scalar_range 
+    plane = tvtk.StructuredGridGeometryFilter(extent = (0, 100, 0, 100, 6, 6))
+    configure_input(plane, grid)
+    plane_mapper = tvtk.PolyDataMapper(lookup_table = lut)
+    configure_input(plane_mapper, plane)
+    plane_mapper.scalar_range = grid.scalar_range
     plane_actor = tvtk.Actor(mapper = plane_mapper) 
 
-    cut_plane = tvtk.Plane(origin = plot3d.output.center, normal=(-0.287, 0, 0.9579)) 
-    cut = tvtk.Cutter(input = plot3d.output, cut_function = cut_plane) 
-    cut_mapper = tvtk.PolyDataMapper(input = cut.output, lookup_table = lut)
+    cut_plane = tvtk.Plane(origin = grid.center, normal=(-0.287, 0, 0.9579))
+    cut = tvtk.Cutter(cut_function = cut_plane)
+    configure_input(cut, grid)
+    cut_mapper = tvtk.PolyDataMapper(lookup_table = lut)
+    configure_input(cut_mapper, cut)
     cut_actor = tvtk.Actor(mapper = cut_mapper)
 
-    outline = tvtk.StructuredGridOutlineFilter(input = plot3d.output)
-    outline_mapper = tvtk.PolyDataMapper(input = outline.output)
+    outline = tvtk.StructuredGridOutlineFilter()
+    configure_input(outline, grid)
+    outline_mapper = tvtk.PolyDataMapper()
+    configure_input(outline_mapper, outline)
     outline_actor = tvtk.Actor(mapper = outline_mapper)
     outline_actor.property.color = 0.3, 0.3, 0.3
 
