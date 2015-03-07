@@ -2,6 +2,7 @@
 from example_cut_plane import read_data
 import numpy as np
 from tvtk.api import tvtk
+from scpy2.tvtk.tvtkhelp import ivtk_scene, event_loop
 
 
 plot3d = read_data()
@@ -56,12 +57,6 @@ outline_mapper = tvtk.PolyDataMapper(input_connection=outline.output_port)
 outline_actor = tvtk.Actor(mapper=outline_mapper)
 outline_actor.property.color = 0.3, 0.3, 0.3
 
-from scpy2.tvtk.tvtkhelp import ivtk_scene
-
 win = ivtk_scene([outline_actor, sphere_actor, tube_actor, arrows_actor])
 win.scene.isometric_view()
-
-from pyface.api import GUI
-
-gui = GUI()
-gui.start_event_loop()
+event_loop()

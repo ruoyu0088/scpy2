@@ -1,14 +1,6 @@
 # -*- coding: utf-8 -*-
-import sip
-
-sip.setapi('QString', 2)
-sip.setapi('QVariant', 2)
-
 import os
 from os import path
-
-os.environ['ETS_TOOLKIT'] = 'qt4'
-
 import numpy as np
 from tvtk.api import tvtk
 
@@ -54,12 +46,8 @@ if __name__ == "__main__":
     outline_actor = tvtk.Actor(mapper=outline_mapper)
     outline_actor.property.color = 0.3, 0.3, 0.3
 
-    from scpy2.tvtk.tvtkhelp import ivtk_scene
+    from scpy2.tvtk.tvtkhelp import ivtk_scene, event_loop
 
     win = ivtk_scene([plane_actor, cut_actor, outline_actor])
     win.scene.isometric_view()
-
-    from pyface.api import GUI
-
-    gui = GUI()
-    gui.start_event_loop()
+    event_loop()
