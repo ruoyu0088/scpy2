@@ -3,9 +3,9 @@
 显示TVTK的类的继承树以及文档，支持简单的搜索功能。
 """
 import cPickle, os.path, gzip
-from enthought.traits.api import (HasTraits, Instance, Any, List, Str, 
+from traits.api import (HasTraits, Instance, Any, List, Str,
     Property, Code, Int, cached_property, Bool)
-from enthought.traits.ui.api import (View, Item, TreeEditor, HSplit, Group, VSplit,
+from traitsui.api import (View, Item, TreeEditor, HSplit, Group, VSplit,
     TreeNodeObject, ObjectTreeNode, CodeEditor, ListStrEditor, Handler)
 
 CACHE_FILE = "tvtk_classes.cache"
@@ -49,8 +49,8 @@ def get_tvtk_class_doc(cls):
 
 SubClasses = {}    
 if not os.path.exists(CACHE_FILE):
-    from enthought.tvtk.api import tvtk
-    from enthought.tvtk.tools.tvtk_doc import get_func_doc
+    from tvtk.api import tvtk
+    from tvtk.tools.tvtk_doc import get_func_doc
     # 遍历所有TVTK类，建立类之间的继承关系
     print "reading TVTK classes"
     for tmp in dir(tvtk):
@@ -144,7 +144,7 @@ class TVTKDocument(HasTraits):
                         label="Search"),
                 ),
                 Item("current_document", style="custom", show_label=False,
-                    editor=CodeEditor(lexer="null", search="top", line = "current_line", 
+                    editor=CodeEditor(lexer="text", search="top", line = "current_line",
                         mark_lines="mark_lines", mark_color=0xff7777)),
                 id = "tvtkdoc.hsplit"
             ),
