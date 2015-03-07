@@ -86,7 +86,8 @@ class StereoDemo(HasTraits):
         poly.points = points
         poly.verts = np.arange(len(points)).reshape(-1, 1)
         poly.point_data.scalars = colors.astype(np.uint8)
-        mapper = tvtk.PolyDataMapper(input=poly)
+        mapper = tvtk.PolyDataMapper()
+        mapper.set_input_data(poly)
         actor = tvtk.Actor(mapper=mapper)
         self.scene.add_actor(actor)
         self.scene.camera.position = (0, 20, -60)

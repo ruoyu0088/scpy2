@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-
 from tvtk.api import tvtk
-from tvtk.common import configure_input
 
 # 创建一个圆锥数据源，并且同时设置其高度，底面半径和底面圆的分辨率(用36边形近似)
 cs = tvtk.ConeSource(height=3.0, radius=1.0, resolution=36)
 # 使用PolyDataMapper将数据转换为图形数据
-m = tvtk.PolyDataMapper()
-configure_input(m, cs)
+m = tvtk.PolyDataMapper(input_connection=cs.output_port)
 # 创建一个Actor
 a = tvtk.Actor(mapper=m)
 # 创建一个Renderer，将Actor添加进去
