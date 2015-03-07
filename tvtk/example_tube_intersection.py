@@ -22,18 +22,18 @@ def get_source(obj, target):
 def difference(pd1, pd2):
     bf = tvtk.BooleanOperationPolyDataFilter()
     bf.operation = "difference"
-    bf.set_input(0, pd1)
-    bf.set_input(1, pd2)
-    m = tvtk.PolyDataMapper(input=bf.output, scalar_visibility=False)
+    bf.set_input_connection(0, pd1)
+    bf.set_input_connection(1, pd2)
+    m = tvtk.PolyDataMapper(input_connection=bf.output_port, scalar_visibility=False)
     a = tvtk.Actor(mapper=m)
     return bf.output, a
 
 
 def intersection(pd1, pd2, color=(1.0, 0, 0), width=2.0):
     ipd = tvtk.IntersectionPolyDataFilter()
-    ipd.set_input(0, pd1)
-    ipd.set_input(1, pd2)
-    m = tvtk.PolyDataMapper(input=ipd.output)
+    ipd.set_input_connection(0, pd1)
+    ipd.set_input_connection(1, pd2)
+    m = tvtk.PolyDataMapper(input_connection=ipd.output_port)
     a = tvtk.Actor(mapper=m)
     a.property.diffuse_color = 1.0, 0, 0
     a.property.line_width = 2.0    
@@ -43,21 +43,21 @@ def intersection(pd1, pd2, color=(1.0, 0, 0), width=2.0):
 def make_tube(height, radius, resolution, rx=0, ry=0, rz=0):
     cs1 = tvtk.CylinderSource(height=height, radius=radius[0], resolution=resolution)
     cs2 = tvtk.CylinderSource(height=height+0.1, radius=radius[1], resolution=resolution)    
-    triangle1 = tvtk.TriangleFilter(input=cs1.output)
-    triangle2 = tvtk.TriangleFilter(input=cs2.output)
+    triangle1 = tvtk.TriangleFilter(input_connection=cs1.output_port)
+    triangle2 = tvtk.TriangleFilter(input_connection=cs2.output_port)
     tr = tvtk.Transform()
     tr.rotate_x(rx)
     tr.rotate_y(ry)
     tr.rotate_z(rz)
-    tf1 = tvtk.TransformFilter(transform=tr, input=triangle1.output)   
-    tf2 = tvtk.TransformFilter(transform=tr, input=triangle2.output)   
+    tf1 = tvtk.TransformFilter(transform=tr, input_connection=triangle1.output_port)
+    tf2 = tvtk.TransformFilter(transform=tr, input_connection=triangle2.output_port)
     bf = tvtk.BooleanOperationPolyDataFilter()
     bf.operation = "difference"
-    bf.set_input(0, tf1.output)
-    bf.set_input(1, tf2.output)
-    m = tvtk.PolyDataMapper(input=bf.output, scalar_visibility=False)
+    bf.set_input_connection(0, tf1.output_port)
+    bf.set_input_connection(1, tf2.output_port)
+    m = tvtk.PolyDataMapper(input_connection=bf.output_port, scalar_visibility=False)
     a = tvtk.Actor(mapper=m)
-    return bf.output, a, tf1.output, tf2.output
+    return bf.output_port, a, tf1.output_port, tf2.output_port
 
 
 class TVTKSceneController(Controller):

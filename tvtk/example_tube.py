@@ -27,13 +27,13 @@ class TubeDemoApp(HasTraits):
         r1, r2 = min(self.radius1, self.radius2), max(self.radius1, self.radius2)
         self.cs1 = cs1 = tvtk.CylinderSource(height=1, radius=r2, resolution=32)
         self.cs2 = cs2 = tvtk.CylinderSource(height=1.1, radius=r1, resolution=32)
-        triangle1 = tvtk.TriangleFilter(input=cs1.output)
-        triangle2 = tvtk.TriangleFilter(input=cs2.output)
+        triangle1 = tvtk.TriangleFilter(input_connection=cs1.output_port)
+        triangle2 = tvtk.TriangleFilter(input_connection=cs2.output_port)
         bf = tvtk.BooleanOperationPolyDataFilter()
         bf.operation = "difference"
-        bf.set_input(0, triangle1.output)
-        bf.set_input(1, triangle2.output)
-        m = tvtk.PolyDataMapper(input=bf.output, scalar_visibility=False)
+        bf.set_input_connection(0, triangle1.output_port)
+        bf.set_input_connection(1, triangle2.output_port)
+        m = tvtk.PolyDataMapper(input_connection=bf.output_port, scalar_visibility=False)
         a = tvtk.Actor(mapper=m)
         a.property.color = 0.5, 0.5, 0.5
         self.scene.add_actors([a])
