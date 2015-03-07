@@ -93,3 +93,9 @@ def ivtk_scene(actors):
     dialog.show()
 
     return window
+
+
+def event_loop():
+    from pyface.api import GUI
+    gui = GUI()
+    gui.start_event_loop()
