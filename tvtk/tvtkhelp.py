@@ -78,8 +78,10 @@ def vtk_scene(actors, size=(800, 600), azimuth=None, elevation=None, viewangle=N
 
 
 def ivtk_scene(actors):
+    from .tvtk_brower_patch import patch_pipeline_browser
     from tvtk.tools import ivtk
 
+    patch_pipeline_browser()
     window = ivtk.IVTKWithCrustAndBrowser(size=(800, 600))
     window.open()
     depth_peeling(window.scene)
