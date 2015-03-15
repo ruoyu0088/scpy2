@@ -11,6 +11,7 @@ def install_magics():
     from IPython.core.display import display_png, display_svg
     from IPython.core.getipython import get_ipython
     from collections import OrderedDict
+    from scpy2.utils.program_finder import GraphvizPath
 
     sh = InteractiveShell.instance()
 
@@ -24,31 +25,6 @@ def install_magics():
     def show_arrays(arrays):
         from scpy2.utils.image import concat_images, display_image
         return display_image(concat_images(arrays))
-
-        import io
-        from matplotlib.image import imsave
-        from IPython import display
-        import numpy as np
-        margin = 10
-        width = sum(arr.shape[1] for arr in arrays) + (len(arrays)-1)*margin
-        height = max(arr.shape[0] for arr in arrays)
-        img = np.empty((height, width, 3), dtype=np.uint8)
-        img.fill(255)
-        x = 0
-        for arr in arrays:
-            if arr.dtype in (np.float32, np.float64):
-                arr = (np.clip(arr, 0, 1) * 255).astype(np.uint8)
-            h, w = arr.shape[:2]
-            if arr.ndim == 2:
-                arr = arr[:, :, None]
-            elif arr.ndim == 3:
-                arr = arr[:, :, :3]
-            img[:h, x:x+w, :] = arr[:, :, :]
-            x += w + margin
-
-        buf = io.BytesIO()
-        imsave(buf, img)
-        return display.Image(buf.getvalue())
 
     @register_line_magic
     def exec_python(line):
@@ -318,15 +294,16 @@ def install_magics():
             ax.set_ylim(-0.5, 1.5)
         fig.canvas.draw()
 
-    DOT_PATH = r"C:\Program Files (x86)\Graphviz2.36\bin\dot.exe"
-
     def run_dot(code, options=[], format='svg'):
         # mostly copied from sphinx.ext.graphviz.render_dot
         import os
         from subprocess import Popen, PIPE
         from sphinx.util.osutil import EPIPE, EINVAL
 
-        dot_args = [DOT_PATH] + options + ['-T', format]
+        if GraphvizPath is None:
+            return "dot.exe not found"
+
+        dot_args = [GraphvizPath] + options + ['-T', format]
         if os.name == 'nt':
             # Avoid opening shell window.
             # * https://github.com/tkf/ipython-hierarchymagic/issues/1
@@ -529,6 +506,10 @@ def install_magics():
         for key in png.type_printers.keys():
             if key.__module__ == "__builtin__":
                 del png.type_printers[key]
+
+    @register_cell_magic
+    def flowchart(line, cell):
+        pass
 
     @register_line_magic
     def sympy_latex(line):
