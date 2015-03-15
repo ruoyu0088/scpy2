@@ -34,7 +34,7 @@ def display_image(image):
     from IPython import display
     buf = io.BytesIO()
     imsave(buf, image)
-    return display.Image(buf.getvalue())
+    return display.display_png(display.Image(buf.getvalue()))
 
 
 def concat_keypoints(image, key_points, nrow, ncol, scale=1):
