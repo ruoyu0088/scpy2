@@ -17,7 +17,9 @@ class PatchMover(object):
         fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
     def on_press(self, event):
-        for patch in reversed(self.ax.patches):
+        patches = self.ax.patches[:]
+        patches.sort(key=lambda patch:patch.get_zorder())
+        for patch in reversed(patches):
             if patch.contains_point((event.x, event.y)):
                 self.selected_patch = patch
                 self.start_mouse_pos = np.array([event.xdata, event.ydata])
@@ -34,13 +36,15 @@ class PatchMover(object):
         self.selected_patch = None
 
 
-fig, ax = plt.subplots()
-ax.set_aspect("equal")
-for i in range(10):
-    poly = RegularPolygon(rand(2), randint(3, 10), rand() * 0.1 + 0.1, facecolor=rand(3))
-    ax.add_patch(poly)
-ax.relim()
-ax.autoscale()
-pm = PatchMover(ax)
+if __name__ == '__main__':
+    fig, ax = plt.subplots()
+    ax.set_aspect("equal")
+    for i in range(10):
+        poly = RegularPolygon(rand(2), randint(3, 10), rand() * 0.1 + 0.1, facecolor=rand(3),
+                              zorder=randint(10, 100))
+        ax.add_patch(poly)
+    ax.relim()
+    ax.autoscale()
+    pm = PatchMover(ax)
 
-plt.show()
+    plt.show()
