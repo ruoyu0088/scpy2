@@ -2,18 +2,18 @@
 from example_cut_plane import read_data
 import numpy as np
 from tvtk.api import tvtk
-from scpy2.tvtk.tvtkhelp import ivtk_scene, event_loop
+from scpy2.tvtk.tvtkhelp import ivtk_scene, event_loop, make_outline
 
 
 plot3d = read_data()
 grid = plot3d.output.get_block(0)
 
-mask = tvtk.MaskPoints(random_mode=True,
-                       on_ratio=50, maximum_number_of_points=1000)
+mask = tvtk.MaskPoints(random_mode=True, on_ratio=50)
 mask.set_input_data(grid)
 
 arrow_source = tvtk.ArrowSource()
-arrows = tvtk.Glyph3D(input_connection=mask.output_port)
+arrows = tvtk.Glyph3D(input_connection=mask.output_port,
+                      scale_factor=2/np.max(grid.point_data.scalars.to_array()))
 arrows.set_source_connection(arrow_source.output_port)
 
 arrows_mapper = tvtk.PolyDataMapper(scalar_range=grid.point_data.scalars.range, input_connection=arrows.output_port)
@@ -49,13 +49,7 @@ tube_mapper = tvtk.PolyDataMapper(
 tube_actor = tvtk.Actor(mapper=tube_mapper)
 tube_actor.property.backface_culling = True
 
-outline = tvtk.StructuredGridOutlineFilter()
-outline.set_input_data(grid)
-
-outline_mapper = tvtk.PolyDataMapper(input_connection=outline.output_port)
-
-outline_actor = tvtk.Actor(mapper=outline_mapper)
-outline_actor.property.color = 0.3, 0.3, 0.3
+outline_actor = make_outline(grid)
 
 win = ivtk_scene([outline_actor, sphere_actor, tube_actor, arrows_actor])
 win.scene.isometric_view()

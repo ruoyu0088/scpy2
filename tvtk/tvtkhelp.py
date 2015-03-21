@@ -1,5 +1,15 @@
 # -*- coding: utf-8 -*-
 
+def make_outline(input_obj):
+    from tvtk.api import tvtk
+    from tvtk.common import configure_input
+    outline = tvtk.StructuredGridOutlineFilter()
+    configure_input(outline, input_obj)
+    outline_mapper = tvtk.PolyDataMapper(input_connection = outline.output_port)
+    outline_actor = tvtk.Actor(mapper = outline_mapper)
+    outline_actor.property.color = 0.3, 0.3, 0.3
+    return outline_actor
+
 
 def depth_peeling(scene):
     rw = scene.render_window

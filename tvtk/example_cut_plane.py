@@ -3,8 +3,9 @@ import os
 from os import path
 import numpy as np
 from tvtk.api import tvtk
+from scpy2.tvtk.tvtkhelp import make_outline
 
-
+make_outline
 def read_data():
     # 读入数据
     folder = path.dirname(__file__)
@@ -40,11 +41,7 @@ if __name__ == "__main__":
     cut_mapper = tvtk.PolyDataMapper(lookup_table=lut, input_connection=cut.output_port)
     cut_actor = tvtk.Actor(mapper=cut_mapper)
 
-    outline = tvtk.StructuredGridOutlineFilter()
-    outline.set_input_data(grid)
-    outline_mapper = tvtk.PolyDataMapper(input_connection=outline.output_port)
-    outline_actor = tvtk.Actor(mapper=outline_mapper)
-    outline_actor.property.color = 0.3, 0.3, 0.3
+    outline_actor = make_outline(grid)
 
     from scpy2.tvtk.tvtkhelp import ivtk_scene, event_loop
 
