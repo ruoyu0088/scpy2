@@ -8,7 +8,7 @@ from tvtk.pyface.scene_model import SceneModel
 
 def get_source(obj, target):
     while True:
-        for attr in "producer_port","producer","input":
+        for attr in "producer_port","producer","input_connection":
             if hasattr(obj, attr):
                 obj = getattr(obj, attr)
                 break
