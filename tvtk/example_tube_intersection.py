@@ -8,7 +8,7 @@ from tvtk.pyface.scene_model import SceneModel
 
 def get_source(obj, target):
     while True:
-        for attr in "producer_port","producer","input_connection":
+        for attr in "producer_port", "producer", "input_connection":
             if hasattr(obj, attr):
                 obj = getattr(obj, attr)
                 break
@@ -22,27 +22,27 @@ def get_source(obj, target):
 def difference(pd1, pd2):
     bf = tvtk.BooleanOperationPolyDataFilter()
     bf.operation = "difference"
-    bf.set_input_connection(0, pd1)
-    bf.set_input_connection(1, pd2)
+    bf.set_input_connection(0, pd1.output_port)
+    bf.set_input_connection(1, pd2.output_port)
     m = tvtk.PolyDataMapper(input_connection=bf.output_port, scalar_visibility=False)
     a = tvtk.Actor(mapper=m)
-    return bf.output, a
+    return bf, a
 
 
 def intersection(pd1, pd2, color=(1.0, 0, 0), width=2.0):
     ipd = tvtk.IntersectionPolyDataFilter()
-    ipd.set_input_connection(0, pd1)
-    ipd.set_input_connection(1, pd2)
+    ipd.set_input_connection(0, pd1.output_port)
+    ipd.set_input_connection(1, pd2.output_port)
     m = tvtk.PolyDataMapper(input_connection=ipd.output_port)
     a = tvtk.Actor(mapper=m)
     a.property.diffuse_color = 1.0, 0, 0
-    a.property.line_width = 2.0    
-    return ipd.output, a
+    a.property.line_width = 2.0
+    return ipd, a
 
 
 def make_tube(height, radius, resolution, rx=0, ry=0, rz=0):
     cs1 = tvtk.CylinderSource(height=height, radius=radius[0], resolution=resolution)
-    cs2 = tvtk.CylinderSource(height=height+0.1, radius=radius[1], resolution=resolution)    
+    cs2 = tvtk.CylinderSource(height=height + 0.1, radius=radius[1], resolution=resolution)
     triangle1 = tvtk.TriangleFilter(input_connection=cs1.output_port)
     triangle2 = tvtk.TriangleFilter(input_connection=cs2.output_port)
     tr = tvtk.Transform()
@@ -57,7 +57,7 @@ def make_tube(height, radius, resolution, rx=0, ry=0, rz=0):
     bf.set_input_connection(1, tf2.output_port)
     m = tvtk.PolyDataMapper(input_connection=bf.output_port, scalar_visibility=False)
     a = tvtk.Actor(mapper=m)
-    return bf.output_port, a, tf1.output_port, tf2.output_port
+    return bf, a, tf1, tf2
 
 
 class TVTKSceneController(Controller):
@@ -75,22 +75,22 @@ class TubeDemoApp(HasTraits):
     update = Button("Update")
     scene = Instance(SceneModel, ())
     view = View(
-                VGroup(
-                    Item(name="scene", editor=SceneEditor(scene_class=Scene)),
-                    HGroup("ri1", "ro1"),
-                    HGroup("ri2", "ro2"),
-                    "update",
-                    show_labels=False                    
-                ),
-                resizable=True,
-                height = 500,
-                width = 500,
-            )
-    
+        VGroup(
+            Item(name="scene", editor=SceneEditor(scene_class=Scene)),
+            HGroup("ri1", "ro1"),
+            HGroup("ri2", "ro2"),
+            "update",
+            show_labels=False
+        ),
+        resizable=True,
+        height=500,
+        width=500,
+    )
+
     def __init__(self, **kw):
         super(TubeDemoApp, self).__init__(**kw)
         self.plot()
-        
+
     def plot(self):
         t1, a1, o1, i1 = make_tube(5.0, [self.ro1, self.ri1], 32)
         t2, a2, o2, i2 = make_tube(5.0, [self.ro2, self.ri2], 32, rx=90)
@@ -99,25 +99,21 @@ class TubeDemoApp(HasTraits):
         ah1.property.opacity = 0.6
         ah2.property.opacity = 0.6
         _, aline = intersection(t1, t2)
-    
-        #bind events
+
+        # bind events
         self.co1 = get_source(o1, tvtk.CylinderSource)
         self.ci1 = get_source(i1, tvtk.CylinderSource)
         self.co2 = get_source(o2, tvtk.CylinderSource)
         self.ci2 = get_source(i2, tvtk.CylinderSource)
         self.scene.add_actors([ah1, ah2, aline])
-        #self.sync_trait("ro1", self.co1, alias="radius", mutual=False)
-        #self.sync_trait("ri1", self.ci1, alias="radius", mutual=False)
-        #self.sync_trait("ro2", self.co2, alias="radius", mutual=False)
-        #self.sync_trait("ri2", self.ci2, alias="radius", mutual=False)
-    
+
     def _update_fired(self):
         self.co1.radius = self.ro1
         self.ci1.radius = self.ri1
         self.co2.radius = self.ro2
         self.ci2.radius = self.ri2
         self.scene.render_window.render()
-        
+
     def depth_peeling(self):
         rw = self.scene.render_window
         renderer = self.scene.renderer
@@ -125,9 +121,9 @@ class TubeDemoApp(HasTraits):
         rw.multi_samples = 0
         renderer.use_depth_peeling = 1
         renderer.maximum_number_of_peels = 100
-        renderer.occlusion_ratio = 0.1   
+        renderer.occlusion_ratio = 0.1
+
 
 if __name__ == "__main__":
     app = TubeDemoApp()
-    #app.edit_traits(handler=TVTKSceneController(app))
     app.configure_traits(handler=TVTKSceneController(app))
