@@ -1,1 +1,2 @@
 from .fix_mayavi_bugs import fix_mayavi_bugs
+from .tvtk_brower_patch import patch_pipeline_browser
