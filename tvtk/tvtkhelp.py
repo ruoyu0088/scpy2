@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 def make_outline(input_obj):
     from tvtk.api import tvtk
     from tvtk.common import configure_input
