@@ -3,7 +3,7 @@
 使用Mayavi绘制多为数组下标存取的演示图像。
 """
 import numpy as np
-from enthought.mayavi import mlab
+from mayavi import mlab
 
 x, y, z = np.mgrid[:6,:7,:8]
 c = np.zeros((6, 7, 8), dtype=np.int)
