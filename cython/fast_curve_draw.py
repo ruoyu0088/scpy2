@@ -10,7 +10,7 @@ def make_noise_sin_wave(period, n):
     x.sort()
     y = np.sin(x)
     m = int(n*0.01)
-    y[np.random.randint(0, n, m)] += np.random.randn(m) * 2
+    y[np.random.randint(0, n, m)] += np.random.randn(m) * 0.4
     return x, y
 
 
