@@ -1,23 +1,23 @@
 #include <stdio.h>
 #include "ahocorasick.h"
 
-/* ËÑË÷¹Ø¼ü×ÖÁĞ±í */
+/* æœç´¢å…³é”®å­—åˆ—è¡¨ */
 AC_ALPHABET_t * allstr[] = {
     "recent", "from", "college"
 };
 
 #define PATTERN_NUMBER (sizeof(allstr)/sizeof(AC_ALPHABET_t *))
 
-/* ËÑË÷ÎÄ±¾ */
+/* æœç´¢æ–‡æœ¬ */
 AC_ALPHABET_t * input_text = {"She recently graduated from college"};
 
-//*** Æ¥ÅäÊ±µÄ»Øµ÷º¯Êı
+//*** åŒ¹é…æ—¶çš„å›è°ƒå‡½æ•°
 int match_handler(AC_MATCH_t * m, void * param)
 {
     unsigned int j;
 
     printf ("@ %ld : %s\n", m->position, m->patterns->astring);
-    /* ·µ»Ø0¼ÌĞøËÑË÷£¬·µ»Ø1Í£Ö¹ËÑË÷ */
+    /* è¿”å›0ç»§ç»­æœç´¢ï¼Œè¿”å›1åœæ­¢æœç´¢ */
     return 0;
 }
 
@@ -29,10 +29,10 @@ int main (int argc, char ** argv)
     AC_PATTERN_t tmp_patt;
     AC_TEXT_t tmp_text;
 
-    //*** ´´½¨AC_AUTOMATA_t½á¹¹Ìå£¬²¢´«µİ»Øµ÷º¯Êı
+    //*** åˆ›å»ºAC_AUTOMATA_tç»“æ„ä½“ï¼Œå¹¶ä¼ é€’å›è°ƒå‡½æ•°
     acap = ac_automata_init();
 
-    //*** Ìí¼Ó¹Ø¼ü×Ö
+    //*** æ·»åŠ å…³é”®å­—
     for (i=0; i<PATTERN_NUMBER; i++)
     {
         tmp_patt.astring = allstr[i];
@@ -41,17 +41,17 @@ int main (int argc, char ** argv)
         ac_automata_add (acap, &tmp_patt);
     }
 
-    //*** ½áÊøÌí¼Ó¹Ø¼ü×Ö
+    //*** ç»“æŸæ·»åŠ å…³é”®å­—
     ac_automata_finalize (acap);
 
-    //*** ÉèÖÃ´ıËÑË÷×Ö·û´®
+    //*** è®¾ç½®å¾…æœç´¢å­—ç¬¦ä¸²
     tmp_text.astring = input_text;
     tmp_text.length = strlen(tmp_text.astring);
 
-    //*** ËÑË÷
+    //*** æœç´¢
     ac_automata_search (acap, &tmp_text, 0, match_handler, NULL);
 
-    //*** ÊÍ·ÅÄÚ´æ
+    //*** é‡Šæ”¾å†…å­˜
     ac_automata_release (acap);
     return 0;
 }
