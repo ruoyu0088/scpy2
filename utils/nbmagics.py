@@ -27,12 +27,6 @@ def install_magics():
         return display_image(concat_images(arrays))
 
     @register_line_magic
-    def exec_python(line):
-        import subprocess
-        cmd = "python " + line
-        subprocess.Popen(cmd, shell=True)
-
-    @register_line_magic
     def col(line):
         pos = line.find(" ")
         n = int(line[:pos])
@@ -77,9 +71,6 @@ def install_magics():
             stdout.append(" "*indent + "...")
             stdout_lines = "\n".join(stdout)
             sys.stdout.write(stdout_lines)
-        #try:
-        #    return result[:count]
-        #except:
         if result:
             print "\n".join(sh.display_formatter.formatters["text/plain"](result).split("\n")[:count])
             print "..."
@@ -200,6 +191,42 @@ def install_magics():
 
     @magics_class
     class ScPy2Magics(Magics):
+
+        @line_magic
+        def exec_python(self, line):
+            """
+            pass all the arguments to a new python process
+            """
+            import subprocess
+            cmd = "python " + line
+            subprocess.Popen(cmd, shell=True)
+
+        @magic_arguments()
+        @argument('language', help='the language of the file')
+        @argument('path', help='the file path in scpy2 folder')
+        @argument('section', help='the include section')
+        @argument("-r", "--run", action='store_true', help='run the included code')
+        @cell_magic
+        def include(self, line, cell):
+            """
+            include section of the files in scpy2 folder
+            """
+            import json
+            args = parse_argstring(self.include, line)
+            language = args.language
+            filepath = args.path
+            section = args.section
+            run = args.run
+            first_line = "%%include " + line
+            section_text = get_section(filepath, section)
+            if run:
+                ip.run_cell(section_text)
+            text = json.dumps(unicode(first_line) + u"\n" + section_text.decode("utf8"))
+            code = """%%javascript
+            replace_cell({0}, {1});
+    """.format(json.dumps(first_line), text)
+            ip.run_cell(code)
+
         @line_magic
         def ets(self, parameter_s=''):
             """Choose backend for ETS GUI
@@ -335,7 +362,6 @@ def install_magics():
                                .format(stderr.decode('utf-8')))
         return stdout
 
-
     @magics_class
     class GraphvizMagic(Magics):
 
@@ -465,23 +491,6 @@ def install_magics():
                     break
                 lines.append(line)
         return "".join(lines).rstrip()
-
-    @register_cell_magic
-    def include(line, cell):
-        import json
-        try:
-            language, filepath, section = line.split()
-        except ValueError:
-            language, filepath = line.split()
-            section = 0
-        section = int(section)
-        first_line = "%%include " + line
-        section_text = get_section(filepath, section)
-        text = json.dumps(unicode(first_line) + u"\n" + section_text.decode("utf8"))
-        code = """%%javascript
-        replace_cell({0}, {1});
-""".format(json.dumps(first_line), text)
-        ip.run_cell(code)
 
     @register_cell_magic
     def func_debug(line, cell):
