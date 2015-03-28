@@ -8,7 +8,7 @@ from traitsui.api import View, Item, HGroup, VGroup, Handler, EnumEditor
 from pyface.timer.api import Timer
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-from scpy2.traitslib import MPLFigureEditor, SettingManager, PositionHandler
+from scpy2.traits import MPLFigureEditor, SettingManager, PositionHandler
 
 FOLDER = path.dirname(__file__)
 IMAGE_FOLDER = path.join(FOLDER, "images")

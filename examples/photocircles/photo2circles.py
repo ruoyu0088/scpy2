@@ -14,7 +14,7 @@ def circle(cx, cy, radius, shape):
     return cc[mask], rr[mask]
 
 
-def photo2circles(img, th1=50, th2=200, counts=(1500, 800)):
+def photo2circles(img, th1=50, th2=200, counts=(2000, 1200)):
     if isinstance(img, basestring):
         img = cv2.imread(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -46,6 +46,9 @@ def main():
     FOLDER = path.dirname(__file__)
 
     for fn in glob(path.join(FOLDER, "*.jpg")):
+        csv_fn = fn.replace(".jpg", ".csv")
+        if path.exists(csv_fn):
+            continue
         print fn
         circles = photo2circles(fn)
         np.savetxt(fn.replace(".jpg", ".csv"), circles, fmt="%g", delimiter=",")

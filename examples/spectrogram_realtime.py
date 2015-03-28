@@ -11,7 +11,7 @@ from traitsui.api import *
 from pyface.timer.api import Timer
 from matplotlib import cm
 from matplotlib.figure import Figure
-from scpy2.traitslib.mpl_figure_editor import MPLFigureEditor
+from scpy2.traits.mpl_figure_editor import MPLFigureEditor
 
 NUM_SAMPLES = 1024
 SAMPLING_RATE = 8000

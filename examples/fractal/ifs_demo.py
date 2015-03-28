@@ -16,7 +16,7 @@ from traitsui.api import View, Item, Handler, VGroup, HGroup, EnumEditor
 from traits.api import (HasTraits, Str, Int, List, Instance, Button, Bool,
                         on_trait_change)
 from pyface.timer.api import Timer
-from scpy2.traitslib import MPLFigureEditor, SettingManager
+from scpy2.traits import MPLFigureEditor, SettingManager
 from .fastfractal import IFS
 
 FOLDER = path.dirname(__file__)

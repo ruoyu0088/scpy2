@@ -9,7 +9,7 @@ from tvtk.pyface.scene_editor import SceneEditor
 from tvtk.pyface.scene import Scene
 from tvtk.pyface.scene_model import SceneModel
 from matplotlib.figure import Figure
-from scpy2.traitslib import MPLFigureEditor
+from scpy2.traits import MPLFigureEditor
 
 FOLDER = path.join(path.dirname(__file__), "stereo")
 

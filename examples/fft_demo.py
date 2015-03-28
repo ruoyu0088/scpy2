@@ -8,7 +8,7 @@ import numpy as np
 
 from matplotlib.figure import Figure
 
-from scpy2.traitslib.mpl_figure_editor import MPLFigureEditor
+from scpy2.traits.mpl_figure_editor import MPLFigureEditor
 
 
 # 鼠标拖动修改值的控件的样式

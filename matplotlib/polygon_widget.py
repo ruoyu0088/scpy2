@@ -6,8 +6,7 @@ from traitsui.api import View, Item, Handler, VGroup, HGroup, EnumEditor
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 from matplotlib.figure import Figure
-from scpy2.traitslib import PositionHandler
-from scpy2.traitslib.mpl_figure_editor import MPLFigureEditor
+from scpy2.traits import PositionHandler, MPLFigureEditor
 
 
 class PolygonWidget(HasTraits):

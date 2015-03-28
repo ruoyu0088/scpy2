@@ -6,7 +6,7 @@ from scipy import integrate
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 
-from scpy2.traitslib.mpl_figure_editor import MPLFigureEditor
+from scpy2.traits.mpl_figure_editor import MPLFigureEditor
 
 
 class Catenary(HasTraits):
