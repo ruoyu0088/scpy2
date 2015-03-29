@@ -2,7 +2,8 @@
 import numpy as np
 import time
 from traits.api import HasTraits, Code, Instance, Button, Str, Float, List, on_trait_change
-from traitsui.api import View, Item, VGroup, VSplit, HSplit, HGroup, ListEditor, InstanceEditor
+from traitsui.api import (View, Item, VGroup, VSplit, HSplit, HGroup, ValueEditor,
+                          TableEditor, InstanceEditor, ObjectColumn)
 from matplotlib.figure import Figure
 from scpy2.traits import MPLFigureEditor
 
@@ -16,9 +17,19 @@ class Point(HasTraits):
         Item("y", format_str="%g")))
 
 
+point_table_editor = TableEditor(
+    columns=[ObjectColumn(name='x', width=100, format="%g"),
+             ObjectColumn(name='y', width=100, format="%g")],
+    editable=True,
+    sortable=False,
+    sort_model=False,
+    auto_size=False,
+    row_factory=Point
+)
+
+
 class FunctionPlotter(HasTraits):
     code = Code()
-    error = Str()
     points = List(Instance(Point), [])
     figure = Instance(Figure, ())
     draw_button = Button("Plot")
@@ -35,10 +46,8 @@ class FunctionPlotter(HasTraits):
                     show_labels=False
                 ),
                 Item("points",
-                     style="readonly",
-                     editor=ListEditor(style="custom", editor=InstanceEditor(view="view")),
+                     editor=point_table_editor,
                      show_label=False),
-                #Item("error", style="custom", show_label=False, width=0.3),
             )
         ),
         width=800, height=600, title="Function Plotter", resizable=True
@@ -80,7 +89,7 @@ class FunctionPlotter(HasTraits):
             last_clock, last_x, last_y = self.button_press_status
             if time.clock() - last_clock > 0.5:
                 return
-            if ((evt.x - last_x)**2 + (evt.y - last_y)**2)**0.5 > 4:
+            if ((evt.x - last_x) ** 2 + (evt.y - last_y) ** 2) ** 0.5 > 4:
                 return
 
         if evt.button == 1:
@@ -119,7 +128,6 @@ class FunctionPlotter(HasTraits):
         self.axe.set_color_cycle(None)
         self.functions = []
         self.lines = []
-        self.error = ""
         for name, value in self.env.items():
             if callable(value):
                 try:
@@ -127,8 +135,10 @@ class FunctionPlotter(HasTraits):
                     if y.shape != x.shape:
                         raise ValueError("the return shape is not the same as x")
                 except Exception as ex:
-                    self.error += "failed when call function {}\n".format(name)
-                    self.error += "{}\n".format(ex)
+                    import traceback
+
+                    print "failed when call function {}\n".format(name)
+                    traceback.print_exc()
                     continue
                 results.append((name, y))
                 self.functions.append(value)
@@ -139,6 +149,7 @@ class FunctionPlotter(HasTraits):
 
         self.axe.legend()
         self.update_figure()
+
 
 if __name__ == '__main__':
     plotter = FunctionPlotter(code="""
