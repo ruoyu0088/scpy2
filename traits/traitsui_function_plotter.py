@@ -95,13 +95,17 @@ class FunctionPlotter(HasTraits):
         if evt.button == 1:
             if evt.xdata is not None and evt.ydata is not None:
                 point = Point(x=evt.xdata, y=evt.ydata)
-                point.on_trait_change(self.update_points, name="x, y")
                 self.points.append(point)
         elif evt.button == 3:
             if self.points:
                 self.points.pop()
 
     @on_trait_change("points[]")
+    def _points_changed(self, obj, name, new):
+        for point in new:
+            point.on_trait_change(self.update_points, name="x, y")
+        self.update_points()
+
     def update_points(self):
         arr = np.array([(point.x, point.y) for point in self.points])
         if arr.shape[0] > 0:
