@@ -5,11 +5,8 @@
 import os
 os.environ["QT_API"] = "pyqt"
 
+###1###
 import matplotlib
-
-from traits.etsconfig.api import ETSConfig
-#ETSConfig.toolkit = 'qt4'
-
 from traits.api import Bool
 from traitsui.api import toolkit
 from traitsui.basic_editor_factory import BasicEditorFactory
@@ -29,7 +26,7 @@ elif ETSConfig.toolkit == "qt4":
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Toolbar
     from traitsui.qt4.editor import Editor
     from pyface.qt import QtGui
-    
+###1###
 
 class _WxFigureEditor(Editor): #{1}
     """
@@ -84,18 +81,18 @@ class _WxFigureEditor(Editor): #{1}
         self.value.canvas.SetMinSize((10,10))
         return panel
 
-
+###3###
 class _QtFigureEditor(Editor):
     scrollable = True
 
-    def init(self, parent):
+    def init(self, parent): #❶
         self.control = self._create_canvas(parent)
         self.set_tooltip()
 
-    def update_editor(self): #{2}
+    def update_editor(self):
         pass
 
-    def _create_canvas(self, parent): #{3}
+    def _create_canvas(self, parent):
         
         panel = QtGui.QWidget()
         
@@ -113,7 +110,7 @@ class _QtFigureEditor(Editor):
         vbox = QtGui.QVBoxLayout()
         panel.setLayout(vbox)
         
-        mpl_control = FigureCanvas(self.value)
+        mpl_control = FigureCanvas(self.value) #❷
         vbox.addWidget(mpl_control)
         if hasattr(self.value, "canvas_events"):
             for event_name, callback in self.value.canvas_events:
@@ -121,43 +118,52 @@ class _QtFigureEditor(Editor):
 
         mpl_control.mpl_connect("motion_notify_event", mousemoved)  
 
-        if self.factory.toolbar:
+        if self.factory.toolbar: #❸
             toolbar = Toolbar(mpl_control, panel)
             vbox.addWidget(toolbar)       
 
         panel.info = QtGui.QLabel(panel)
         vbox.addWidget(panel.info)
         return panel    
-    
+###3###
 
-class MPLFigureEditor(BasicEditorFactory): #{5}
+###4###
+class MPLFigureEditor(BasicEditorFactory):
     """
     相当于traits.ui中的EditorFactory，它返回真正创建控件的类
     """    
     if ETSConfig.toolkit == "wx":
         klass = _WxFigureEditor
     elif ETSConfig.toolkit == "qt4":
-        klass = _QtFigureEditor
+        klass = _QtFigureEditor  #❶
         
-    toolbar = Bool(True)
+    toolbar = Bool(True)  #❷
+###4###
 
 if __name__ == "__main__":
     from matplotlib.figure import Figure    
-    from enthought.traits.api import HasTraits, Instance
-    from enthought.traits.ui.api import View, Item
+    from traits.api import HasTraits, Instance
+    from traitsui.api import View, Item
     from numpy import sin, linspace, pi
 
-    class Test(HasTraits):
-        figure = Instance(Figure, ()) #{6}
+    class TestMplFigureEditor(HasTraits):
+        figure = Instance(Figure, ())
         view = View(
             Item("figure", editor=MPLFigureEditor(toolbar=True), show_label=False),
             width = 400,
             height = 300,
             resizable = True)
+
         def __init__(self):
             super(Test, self).__init__()
+            self.figure.canvas_events = [
+                ("button_press_event", self.figure_button_pressed)
+            ]
             axes = self.figure.add_subplot(111)
             t = linspace(0, 2*pi, 200)
             axes.plot(sin(t))
 
-    Test().configure_traits()    
+        def figure_button_pressed(self, event):
+            print event.xdata, event.ydata
+
+    TestMplFigureEditor().configure_traits()
