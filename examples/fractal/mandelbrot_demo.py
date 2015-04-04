@@ -9,7 +9,7 @@ from traits.api import HasTraits, Instance, Float, Str, List, Int, on_trait_chan
 from traitsui.api import View, Group, Item, Controller, HGroup, VGroup, EnumEditor
 from matplotlib.figure import Figure
 from matplotlib import cm
-from scpy2.traitslib.mpl_figure_editor import MPLFigureEditor
+from scpy2.traits.mpl_figure_editor import MPLFigureEditor
 from .fastfractal import mandelbrot
 
 SIZE = 500
