@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
-
-os.environ["QT_API"] = "pyqt"
-from traits.etsconfig.api import ETSConfig
-
-ETSConfig.toolkit = 'qt4'
-
 from os import path
 import numpy as np
 
@@ -22,17 +15,7 @@ from .fastfractal import IFS
 FOLDER = path.dirname(__file__)
 DATA_FILE = path.join(FOLDER, "IFS_data.json")
 
-
-def triangle_area(triangle):
-    """
-    计算三角形的面积
-    """
-    A, B, C = triangle
-    AB = A - B
-    AC = A - C
-    return np.abs(np.cross(AB, AC)) / 2.0
-
-
+###1###
 def solve_eq(triangle1, triangle2):
     """
     解方程，从triangle1变换到triangle2的变换系数
@@ -57,7 +40,17 @@ def solve_eq(triangle1, triangle2):
     c = np.linalg.solve(a, b)
     c.shape = (2, 3)
     return c
-
+###1###
+###2###
+def triangle_area(triangle):
+    """
+    计算三角形的面积
+    """
+    A, B, C = triangle
+    AB = A - B
+    AC = A - C
+    return np.abs(np.cross(AB, AC)) / 2.0
+###2###
 
 class IFSTriangles(HasTraits):
     """
