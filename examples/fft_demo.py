@@ -2,7 +2,7 @@
 from traits.api import (Str, Float, HasTraits, Range, Instance, 
                         on_trait_change, Enum)
 
-from traitsui.api import Item, View, VGroup, HSplit, ScrubberEditor, VSplit
+from traitsui.api import Item, View, VGroup, HSplit, VSplit
 
 import numpy as np
 
@@ -10,13 +10,6 @@ from matplotlib.figure import Figure
 
 from scpy2.traits.mpl_figure_editor import MPLFigureEditor
 
-
-# 鼠标拖动修改值的控件的样式
-scrubber = ScrubberEditor(
-    hover_color  = 0xFFFFFF, 
-    active_color = 0xA0CD9E, 
-    border_color = 0x808080
-)
 
 # 取FFT计算的结果freqs中的前n项进行合成，返回合成结果，计算loops个周期的波形
 def fft_combine(freqs, n, loops=1):
@@ -49,14 +42,14 @@ class TriangleWave(BaseWave):
     length_c = Range("low", "wave_width", 0.5)
 
     # 三角波的定点的y轴坐标
-    height_c = Float(1.0)
+    height_c = Range(0.0, 2.0, 1.0)
     
     # 设置用户界面的视图， 注意一定要指定窗口的大小，这样绘图容器才能正常初始化
     view = View(
             VGroup(
-                Item("wave_width", editor = scrubber, label=u"波形宽度"),
-                Item("length_c", editor = scrubber, label=u"最高点x坐标"),
-                Item("height_c", editor = scrubber, label=u"最高点y坐标"),
+                Item("wave_width", label=u"波形宽度"),
+                Item("length_c", label=u"最高点x坐标"),
+                Item("height_c", label=u"最高点y坐标"),
             ))
 
     # 返回一个ufunc计算指定参数的三角波
@@ -80,13 +73,13 @@ class TriangleWave(BaseWave):
 class RectangleWave(BaseWave):
     low = Range(0.0, 1.0, 0.1)
     hi = Range(0.0, 1.0, 0.5)
-    height = Float(1.0)
+    height = Range(0, 2.0, 1.0)
     
     view = View(
             VGroup(
-                Item("low", editor = scrubber, label=u"跳变X轴1"),
-                Item("hi", editor = scrubber, label=u"跳变X轴2"),
-                Item("height", editor = scrubber, label=u"高度"),
+                Item("low", label=u"跳变X轴1"),
+                Item("hi", label=u"跳变X轴2"),
+                Item("height", label=u"高度"),
             ))
 
     # 返回一个ufunc计算指定参数的三角波
