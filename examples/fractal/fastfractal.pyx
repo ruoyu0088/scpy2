@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #cython: boundscheck=False, wraparound=False
+###1###
 from libc.math cimport log2
 import numpy as np
 import cython
@@ -39,7 +40,7 @@ def mandelbrot(double cx, double cy, double d, int h=0, int w=0,
             z.real = x0 + j * dx
             r[i, j] = iter_point(z, n, R)
     return r.base 
-    
+###1###
     
 cdef class IFS:
     cdef double[::1] rx, ry
