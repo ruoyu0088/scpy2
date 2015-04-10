@@ -2,8 +2,6 @@
 """
 将matplotlib的绘图嵌入TraitsUI界面的控件
 """
-import os
-os.environ["QT_API"] = "pyqt"
 
 ###1###
 import matplotlib
@@ -155,7 +153,7 @@ if __name__ == "__main__":
             resizable = True)
 
         def __init__(self):
-            super(Test, self).__init__()
+            super(TestMplFigureEditor, self).__init__()
             self.figure.canvas_events = [
                 ("button_press_event", self.figure_button_pressed)
             ]
