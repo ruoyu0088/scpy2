@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .select_compiler import show_compiler, set_msc_version, set_compiler
+from .select_compiler import show_compiler, set_msvc_version, set_compiler
 
 
 def tabulate_it(rows, cols, func, label_fmt="**{}**"):

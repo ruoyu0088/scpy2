@@ -30,7 +30,7 @@ def show_compiler():
     print "{} {} defined by {}".format(compiler_name, version, fn)
 
 
-def set_msc_version(version):
+def set_msvc_version(version):
     import sys
     import re
     from distutils import msvc9compiler
