@@ -36,7 +36,7 @@ class SudokuSolver(object):
         solution = sat.assume_solve(assumes)
         if isinstance(solution, list):
             res = np.array(sat.solve())
-            mask = (res > 0).reshape(9,9,9)
+            mask = (res > 0).reshape(9, 9, 9)
             return (np.where(mask)[2]+1).reshape(9, 9)
         else:
             return None
