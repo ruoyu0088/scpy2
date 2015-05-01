@@ -38,9 +38,9 @@ cdef extern from "ahocorasick.h": #❶
 
 ###4###
 cdef int isin_callback(AC_MATCH_t * match, void * param):
-    cdef MultiSearch ms = <MultiSearch> param
-    ms.found = True
-    return 1
+    cdef MultiSearch ms = <MultiSearch> param #❶
+    ms.found = True  #❷
+    return 1  #❸
 ###4###
 ###6###
 cdef int search_callback(AC_MATCH_t * match, void * param):
@@ -48,10 +48,10 @@ cdef int search_callback(AC_MATCH_t * match, void * param):
     cdef bytes pattern = match.patterns.astring
     cdef int res = 1
     try:
-        res = ms.callback(match.position - len(pattern), pattern)
+        res = ms.callback(match.position - len(pattern), pattern)  #❶
     except Exception as ex:
         import sys
-        ms.exc_info = sys.exc_info()
+        ms.exc_info = sys.exc_info()  #❷
     return res
 ###6###   
 
@@ -90,11 +90,11 @@ cdef class MultiSearch:
 
 ###3###
     def isin(self, bytes text, bint keep=False):
-        cdef AC_TEXT_t temp_text
+        cdef AC_TEXT_t temp_text   #❶
         temp_text.astring = <char *>text
         temp_text.length = len(text)
-        self.found = False
-        ac_automata_search(self._auto, &temp_text, keep, isin_callback, <void *>self)
+        self.found = False         #❷
+        ac_automata_search(self._auto, &temp_text, keep, isin_callback, <void *>self) #❸
         return self.found
 ###3###
 
@@ -104,11 +104,11 @@ cdef class MultiSearch:
         temp_text.astring = <char *>text
         temp_text.length = len(text)
         self.found = False
-        self.callback = callback
+        self.callback = callback  #❶
         self.exc_info = None
-        ac_automata_search(self._auto, &temp_text, keep, search_callback, <void *>self)
+        ac_automata_search(self._auto, &temp_text, keep, search_callback, <void *>self) #❷
         if self.exc_info is not None:
-            raise self.exc_info[1], None, self.exc_info[2]
+            raise self.exc_info[1], None, self.exc_info[2]  #❸
 ###5###
 ###7###
     def iter_search(self, bytes text, bint keep=False):
