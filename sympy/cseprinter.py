@@ -1,7 +1,8 @@
 import math
 import re
-from sympy import cse, numbered_symbols, S
+from sympy import cse, numbered_symbols, S, lambdify
 from sympy.printing import StrPrinter
+
 
 FUNC_ALIAS = {
     "asin": ["arcsin"],

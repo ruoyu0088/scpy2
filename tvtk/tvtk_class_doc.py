@@ -8,6 +8,7 @@ from traits.api import (HasTraits, Instance, Any, List, Str,
 from traitsui.api import (View, Item, TreeEditor, HSplit, Group, VSplit,
     TreeNodeObject, ObjectTreeNode, CodeEditor, ListStrEditor, Handler)
 
+
 CACHE_FILE = "tvtk_classes.cache"
 
 # 忽略HasTraits中定义的所有方法
@@ -78,7 +79,8 @@ else:
     SubClasses = cPickle.load(f)
     f.close()
     print "done"
-           
+
+
 class TVTKClass(TreeNodeObject):
     children = List()
     name = Str("node")

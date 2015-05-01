@@ -6,7 +6,7 @@ from traits.api import Enum
 from traitsui.api import VGroup
 from .demobase import ImageProcessDemo
 
-MODES = [name for name in dir(cv2) if name.startswith("RETR_")]
+MODES = ["RETR_EXTERNAL", "RETR_LIST", "RETR_CCOMP", "RETR_TREE"]
 METHODS = [name for name in dir(cv2) if name.startswith("CHAIN_APPROX_")]
 
 
@@ -23,6 +23,7 @@ def get_hierarchy_depth(parent):
 
 class FindContoursDemo(ImageProcessDemo):
     TITLE = u"Find Contours Demo"
+    DEFAULT_IMAGE = "coins.png"
 
     mode = Enum(MODES)
     method = Enum(METHODS)

@@ -3,7 +3,7 @@ from os import path
 import numpy as np
 import cv2
 from traits.api import HasTraits, Instance, Button
-from traitsui.api import View, Item, HGroup, VGroup
+from traitsui.api import View, Item, HGroup, VGroup, HSplit
 from tvtk.api import tvtk
 from tvtk.pyface.scene_editor import SceneEditor
 from tvtk.pyface.scene import Scene
@@ -13,7 +13,9 @@ from scpy2.traits import MPLFigureEditor
 
 FOLDER = path.join(path.dirname(__file__), "stereo")
 
+
 class StereoDemo(HasTraits):
+
     update_button = Button(u"Update")
     scene = Instance(SceneModel, ())
     figure = Instance(Figure, ())
@@ -24,12 +26,13 @@ class StereoDemo(HasTraits):
                 "update_button",
                 show_labels=False
             ),
-            HGroup(
+            HSplit(
                 Item(name="figure", editor=MPLFigureEditor(toolbar=False)),
                 Item(name="scene", editor=SceneEditor(scene_class=Scene)),
                 show_labels=False
             )
         ),
+        title="Stereo Camera Demo",
         width=800,
         height=400,
         resizable=True,

@@ -226,6 +226,7 @@ def install_magics():
             replace_cell({0}, {1});
     """.format(json.dumps(first_line), text)
             ip.run_cell(code)
+            ip.run_cell("from IPython import display;display.clear_output(True)")
 
         @line_magic
         def ets(self, parameter_s=''):
@@ -480,7 +481,7 @@ def install_magics():
         section_mark = "###{}###".format(section)
         lines = []
         flag = False
-        if section == 0:
+        if section == "0":
             flag = True
         for line in open(path.join(path.dirname(scpy2.__file__), filepath)):
             if not flag and line.startswith(section_mark):
