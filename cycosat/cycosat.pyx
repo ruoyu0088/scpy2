@@ -29,7 +29,7 @@ cdef class CoSAT:
 
     def __cinit__(self):
         self.buf_pos = -1
-        self.clauses = array.array("i", [0])
+        self.clauses = array.array("i", [0])  #❶
         
     def __dealloc__(self):
         self.close_sat()
