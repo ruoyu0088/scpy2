@@ -23,9 +23,10 @@ if __name__ == "__main__":
     grid = plot3d.output.get_block(0)
 
     # 创建颜色映射表
-    lut = tvtk.LookupTable()
+
     import pylab as pl
 
+    lut = tvtk.LookupTable()
     lut.table = pl.cm.cool(np.arange(0, 256)) * 255
 
     # 显示StructuredGrid中的一个网格面
@@ -35,10 +36,13 @@ if __name__ == "__main__":
     plane_mapper.scalar_range = grid.scalar_range
     plane_actor = tvtk.Actor(mapper=plane_mapper)
 
+    lut2 = tvtk.LookupTable()
+    lut2.table = pl.cm.cool(np.arange(0, 256)) * 255
+
     cut_plane = tvtk.Plane(origin=grid.center, normal=(-0.287, 0, 0.9579))
     cut = tvtk.Cutter(cut_function=cut_plane)
     cut.set_input_data(grid)
-    cut_mapper = tvtk.PolyDataMapper(lookup_table=lut, input_connection=cut.output_port)
+    cut_mapper = tvtk.PolyDataMapper(lookup_table=lut2, input_connection=cut.output_port)
     cut_actor = tvtk.Actor(mapper=cut_mapper)
 
     outline_actor = make_outline(grid)
