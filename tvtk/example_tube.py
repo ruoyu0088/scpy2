@@ -1,3 +1,5 @@
+#ecoding=utf8
+###1###
 from traits.api import HasTraits, Instance, Range, on_trait_change
 from traitsui.api import View, Item, VGroup, HGroup, Controller
 from tvtk.api import tvtk
@@ -9,16 +11,16 @@ from tvtk.pyface.scene_model import SceneModel
 class TVTKSceneController(Controller):
     def position(self, info):
         super(TVTKSceneController, self).position(info)
-        self.model.plot()
+        self.model.plot() #❸
 
- 
+
 class TubeDemoApp(HasTraits):
     radius1 = Range(0, 1.0, 0.8)
     radius2 = Range(0, 1.0, 0.4)
-    scene = Instance(SceneModel, ())
+    scene = Instance(SceneModel, ()) #❶
     view = View(
                 VGroup(
-                    Item(name="scene", editor=SceneEditor(scene_class=Scene)),
+                    Item(name="scene", editor=SceneEditor(scene_class=Scene)), #❷
                     HGroup("radius1", "radius2"),
                     show_labels=False),
                 resizable=True, height=500, width=500)
@@ -40,12 +42,14 @@ class TubeDemoApp(HasTraits):
         self.scene.background = 1, 1, 1
         self.scene.reset_zoom()
     
-    @on_trait_change("radius1, radius2")
+    @on_trait_change("radius1, radius2") #❹
     def update_radius(self):
         self.cs1.radius = max(self.radius1, self.radius2)
         self.cs2.radius = min(self.radius1, self.radius2)
         self.scene.render_window.render()        
 
+
 if __name__ == "__main__":
     app = TubeDemoApp()
     app.configure_traits(handler=TVTKSceneController(app))
+###1###
