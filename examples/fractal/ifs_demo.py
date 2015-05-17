@@ -37,9 +37,9 @@ def solve_eq(triangle1, triangle2):
     a[4, 0:3] = x2, y2, 1
     a[5, 3:6] = x2, y2, 1
 
-    c = np.linalg.solve(a, b)
-    c.shape = (2, 3)
-    return c
+    x = np.linalg.solve(a, b)
+    x.shape = (2, 3)
+    return x
 ###1###
 ###2###
 def triangle_area(triangle):
