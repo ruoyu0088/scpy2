@@ -212,6 +212,7 @@ def install_magics():
             include section of the files in scpy2 folder
             """
             import json
+            ip = get_ipython()
             args = parse_argstring(self.include, line)
             language = args.language
             filepath = args.path
@@ -526,23 +527,27 @@ def install_magics():
         from sympy import latex
         from IPython.display import Latex
         ip = get_ipython()
-        return Latex(latex(ip.ev(line)))
+        return Latex("$${}$$".format(latex(ip.ev(line))))
 
     @register_cell_magic
     def mlab_plot(line, cell):
         from mayavi import mlab
         ip = get_ipython()
-        mlab.options.offscreen = True
-        if line:
-            width, height = [int(x) for x in line.split()]
-        else:
-            width, height = 800, 600
-        scene = mlab.figure(size=(width, height))
-        scene.scene.background = 1, 1, 1
-        ip.run_cell(cell)
-        from scpy2 import vtk_scene_to_array
-        img = vtk_scene_to_array(scene.scene)
-        return show_arrays([img])
+        offscreen = mlab.options.offscreen
+        try:
+            mlab.options.offscreen = True
+            if line:
+                width, height = [int(x) for x in line.split()]
+            else:
+                width, height = 800, 600
+            scene = mlab.figure(size=(width, height))
+            scene.scene.background = 1, 1, 1
+            ip.run_cell(cell)
+            from scpy2 import vtk_scene_to_array
+            img = vtk_scene_to_array(scene.scene)
+            return show_arrays([img])
+        finally:
+            mlab.options.offscreen = offscreen
 
     @register_cell_magic
     def thread(line, cell):
@@ -578,6 +583,36 @@ def install_magics():
                     if keyword in name.lower():
                         print "{}.{}".format(key, name)
 
+    @magic_arguments()
+    @argument('-l', '--lines', help='max lines', type=int, default=100)
+    @argument('-c', '--chars', help='max chars', type=int, default=10000)
+    @register_cell_magic
+    def cut(line, cell):
+        from IPython.core.getipython import get_ipython
+        from sys import stdout
+        args = parse_argstring(cut, line)
+        max_lines = args.lines
+        max_chars = args.chars
+
+        counters = dict(chars=0, lines=0)
+
+        def write(string):
+            counters["lines"] += string.count("\n")
+            counters["chars"] += len(string)
+
+            if counters["lines"] >= max_lines:
+                raise IOError("Too many lines")
+            elif counters["chars"] >= max_chars:
+                raise IOError("Too many characters")
+            else:
+                old_write(string)
+
+        try:
+            old_write, stdout.write = stdout.write, write
+            ipython = get_ipython()
+            ipython.run_cell(cell)
+        finally:
+            del stdout.write
 
     ip = get_ipython()
     ip.register_magics(CythonPartsMagic)
