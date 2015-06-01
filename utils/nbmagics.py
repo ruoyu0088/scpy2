@@ -224,10 +224,19 @@ def install_magics():
                 ip.run_cell(section_text)
             text = json.dumps(unicode(first_line) + u"\n" + section_text.decode("utf8"))
             code = """%%javascript
-            replace_cell({0}, {1});
+(function(pattern, text){{
+    var cells = IPython.notebook.get_cells();
+    for (var i = 0; i < cells.length; i++) {{
+        var cell = cells[i];
+        if (cell.get_text().indexOf(pattern) == 0){{
+            cell.set_text(text);
+        }}
+    }}
+}})({0}, {1});
     """.format(json.dumps(first_line), text)
-            ip.run_cell(code)
-            ip.run_cell("from IPython import display;display.clear_output(True)")
+            ip.run_cell(code)            
+            from IPython import display
+            display.clear_output()
 
         @line_magic
         def ets(self, parameter_s=''):
