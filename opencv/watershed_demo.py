@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from traits.api import Enum
 from traitsui.api import VGroup, Item
-from scpy2.matplotlib.freedraw_widget2 import ImageMaskDrawer
+from scpy2.matplotlib.freedraw_widget import ImageMaskDrawer
 from .demobase import ImageProcessDemo
 
 MARKER_COLORS = np.array([
@@ -32,6 +32,7 @@ class WatershedDemo(ImageProcessDemo):
             ("button_press_event", self.on_button_pressed)
         ]
         self.result_artist = self.axe.imshow(np.zeros((10, 10, 3), np.uint8), alpha=0.3)
+        self.mask_artist = None
         self.markers = None
 
     def control_panel(self):
@@ -48,6 +49,8 @@ class WatershedDemo(ImageProcessDemo):
 
     def init_draw(self):
         h, w = self.img.shape[:2]
+        if self.mask_artist is not None:
+            self.mask_artist.remove()
         self.mask_artist = ImageMaskDrawer(self.axe, mask_shape=(h, w),
                                            canmove=False, size=10)
         self.mask_artist.on_trait_change(self.update_markers, "drawed")
@@ -63,6 +66,9 @@ class WatershedDemo(ImageProcessDemo):
 
     def draw(self):
         if self.markers is not None:
+            if self.img.shape[:2] != self.markers.shape:
+                self.init_draw()
+
             self.result[:] = self.markers
             cv2.watershed(self.img, self.result)
             img = MARKER_COLORS[self.result]
