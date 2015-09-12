@@ -4,7 +4,7 @@ import numpy as np
 from numpy import fft
 from traits.api import Instance, Button, List, Bool, Event, Range, TraitError
 from traitsui.api import Item, VGroup
-from scpy2.matplotlib.freedraw_widget2 import ImageMaskDrawer
+from scpy2.matplotlib.freedraw_widget import ImageMaskDrawer
 from .demobase import ImageProcessDemo
 
 
@@ -42,7 +42,6 @@ class FFT2DDemo(ImageProcessDemo):
                                            canmove=False, size=15)
         self.connect_dirty("mask_artist.mask_updated")
 
-
     def on_button_pressed(self, event):
         if event.inaxes is self.axe:
             if event.button == 3:
@@ -54,16 +53,17 @@ class FFT2DDemo(ImageProcessDemo):
         self.draw()
 
     def _img_changed(self):
-        w, h = self.img.shape[:2]
-        if w >= FFT_SIZE and h >= FFT_SIZE:
-            self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)[:FFT_SIZE, :FFT_SIZE].copy()
-            self.img_freq = fft.fft2(self.img_gray)
-            self.img_mag = fft.fftshift(np.log10(np.abs(self.img_freq)))
-            self.img_show = np.hstack((self.img[:FFT_SIZE, :FFT_SIZE, :], self.img[:FFT_SIZE, :FFT_SIZE, :]))
-            self.img_show[:FFT_SIZE, FFT_SIZE:, :] = self.img_gray[:FFT_SIZE, :FFT_SIZE, None]
+        img = cv2.resize(self.img, (FFT_SIZE, FFT_SIZE))
+        w, h = img.shape[:2]
 
-            img_uint8 = normalize_gray_image(self.img_mag)
-            self.img_show[:FFT_SIZE, :FFT_SIZE, :] = img_uint8[:, :, None]
+        self.img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)[:FFT_SIZE, :FFT_SIZE].copy()
+        self.img_freq = fft.fft2(self.img_gray)
+        self.img_mag = fft.fftshift(np.log10(np.abs(self.img_freq)))
+        self.img_show = np.hstack((img[:FFT_SIZE, :FFT_SIZE, :], img[:FFT_SIZE, :FFT_SIZE, :]))
+        self.img_show[:FFT_SIZE, FFT_SIZE:, :] = self.img_gray[:FFT_SIZE, :FFT_SIZE, None]
+
+        img_uint8 = normalize_gray_image(self.img_mag)
+        self.img_show[:FFT_SIZE, :FFT_SIZE, :] = img_uint8[:, :, None]
 
     def draw(self):
         if self.mask_artist is None:
