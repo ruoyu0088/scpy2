@@ -28,12 +28,13 @@ class ImageMaskDrawer(HasTraits):
         self.create_mask(img, mask_shape)
 
         self.canvas = ax.figure.canvas
-        self.canvas.mpl_connect('motion_notify_event', self.on_move)
-        self.canvas.mpl_connect('draw_event', self.on_draw)
-        self.canvas.mpl_connect('button_press_event', self.on_press)
-        self.canvas.mpl_connect('button_release_event', self.on_release)
-        self.canvas.mpl_connect('scroll_event', self.on_scroll)
-
+        self.event_ids = [
+            self.canvas.mpl_connect('motion_notify_event', self.on_move),
+            self.canvas.mpl_connect('draw_event', self.on_draw),
+            self.canvas.mpl_connect('button_press_event', self.on_press),
+            self.canvas.mpl_connect('button_release_event', self.on_release),
+            self.canvas.mpl_connect('scroll_event', self.on_scroll),
+        ]
         self.circle = mpatches.Circle((0, 0), size, facecolor="red",
                                       alpha=0.5, animated=True)
         self.ax.add_patch(self.circle)
@@ -48,6 +49,11 @@ class ImageMaskDrawer(HasTraits):
 
         self.timer = Timer(40, self.check_dirty)
 
+    def remove(self):
+        self.mask_img.remove()
+        self.circle.remove()
+        for event_id in self.event_ids:
+            self.canvas.mpl_disconnect(event_id)
 
     def check_dirty(self):
         if self.is_dirty:
@@ -93,6 +99,7 @@ class ImageMaskDrawer(HasTraits):
     def on_press(self, event):
         buttons = (1, 3) if self.canmove else (1, )
         if event.button in buttons and event.inaxes is self.ax:
+            self.mask_img.set_visible(True)
             self.img_pos = self.mask_img.bbox._bbox.get_points()
             self.last_pos = self.transform_pos(event.xdata, event.ydata)
             self.last_pos2 = event.xdata, event.ydata
