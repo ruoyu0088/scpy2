@@ -10,8 +10,6 @@ class DataCircleCollection(CircleCollection):
 
     def draw(self, render):
         ax = self.axes
-
-        m = ax.transData.get_affine().get_matrix()
         ms = np.zeros((len(self._sizes), 3, 3))
         ms[:, 0, 0] = self._sizes
         ms[:, 1, 1] = self._sizes
